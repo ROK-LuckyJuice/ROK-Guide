@@ -6,7 +6,7 @@
 const CATS=[['초보자 가이드','🌱'],['영웅','👑'],['길드전','⚔️'],['전사','🛡️'],['계산기','🧮'],['레인저','🏹'],['기타 공략','📖'],['마법사','🔮']];const $=id=>document.getElementById(id);let category='',query='',posts=[],admin=false,client=null;const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const CONFIG={
   url:'https://ncfgwsgwohligwwlemcw.supabase.co',
-  anonKey:'sb_publishable_65uGXHJw36zlPK0ovhPUOA_trFLWh3j_Publishable_Key'
+  anonKey:'sb_publishable_65uGXHJw36zlPK0ovhPUOA_trFLWh3j'
 };
 async function init(){if(CONFIG.url&&CONFIG.anonKey){try{const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2');client=createClient(CONFIG.url,CONFIG.anonKey);await load();const {data}=await client.auth.getSession();admin=!!data.session;client.auth.onAuthStateChange((_event,session)=>{admin=!!session;render()})}catch(e){console.error(e);showNotice('데이터 연결에 실패했습니다. 설정을 확인해 주세요.')}}else{posts=JSON.parse(localStorage.getItem('guide-demo-posts')||'[]');}render()}
 function showNotice(msg){alert(msg)}async function load(){if(!client)return;const {data,error}=await client.from('guides').select('*').order('created_at',{ascending:false});if(error)throw error;posts=data||[];render()}
