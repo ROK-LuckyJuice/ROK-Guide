@@ -2,6 +2,7 @@
 :root{--bg:#0d1420;--panel:#182334;--edge:#324258;--gold:#e7c278;--txt:#edf1f6;--muted:#a8b6c8}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#26374a,#0d1420 60%);font-family:system-ui,'Malgun Gothic',sans-serif;color:var(--txt)}button,input,textarea,select{font:inherit}button{cursor:pointer}.wrap{max-width:1080px;margin:auto;padding:24px 18px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{color:var(--gold);font-weight:800}.small{font-size:13px;color:var(--muted)}.hero{text-align:center;padding:48px 12px 28px}.hero h1{font-size:clamp(36px,6vw,64px);margin:12px 0;color:var(--gold);text-shadow:0 3px 16px #000}.search{display:flex;max-width:650px;margin:22px auto;gap:8px}.search input{flex:1;min-width:0}.input,input,textarea,select{background:#0f1927;color:white;border:1px solid var(--edge);border-radius:10px;padding:13px}.btn{background:linear-gradient(#f0d393,#b98d42);color:#172030;border:0;border-radius:10px;padding:12px 18px;font-weight:800}.ghost{background:#24364b;color:white;border:1px solid #40536a;border-radius:10px;padding:10px 15px}.cats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0}.cat{padding:22px 8px;background:linear-gradient(145deg,#26374a,#162335);border:1px solid #536078;border-radius:14px;color:white;font-size:16px;font-weight:700}.cat.active{border-color:var(--gold);box-shadow:0 0 0 2px #e7c27840}.cat span{display:block;font-size:29px;margin-bottom:7px}.section{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:28px 0 14px}.section h2{margin:0}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card,.panel{background:#182334;border:1px solid #36485d;border-radius:14px;padding:20px}.card h3{margin:8px 0}.tag{color:var(--gold);font-size:12px}.card p{color:var(--muted);font-size:14px;line-height:1.6}.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:35px}.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:16px;z-index:4}.modal.open{display:flex}.dialog{width:min(720px,100%);max-height:90vh;overflow:auto;background:#182334;border:1px solid #56647a;border-radius:18px;padding:24px}.field{display:grid;gap:7px;margin:12px 0}.field textarea{min-height:170px;resize:vertical}.actions{display:flex;gap:8px;flex-wrap:wrap}.hidden{display:none!important}.notice{padding:12px;background:#263a48;border-radius:10px;color:#d9e6f4;font-size:13px}.calcgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.result{font-size:26px;color:var(--gold);font-weight:800}.article{white-space:pre-wrap;line-height:1.8}.article img{max-width:100%;border-radius:8px}.footer{text-align:center;margin-top:60px;color:var(--muted);font-size:12px}@media(max-width:700px){.cats{grid-template-columns:repeat(2,1fr)}.cards,.calcgrid{grid-template-columns:1fr}.hero{padding-top:30px}.top{flex-wrap:wrap}}
 
 /* 블로그형 공략 편집기 */
+.rich-toolbar button.format-active{outline:3px solid #e7c278;outline-offset:1px;box-shadow:0 0 0 2px #182334 inset}.color-palette{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 .rich-toolbar{display:flex;flex-wrap:wrap;gap:6px;padding:9px;background:#101b2b;border:1px solid var(--edge);border-radius:10px 10px 0 0}.rich-toolbar button,.rich-toolbar select,.rich-toolbar input[type=color]{min-height:34px;padding:5px 9px;border:1px solid #536078;background:#26374a;color:white;border-radius:7px}.rich-toolbar input[type=color]{width:42px;padding:3px}.rich-editor{min-height:240px;max-height:52vh;overflow:auto;background:#0f1927;border:1px solid var(--edge);border-top:0;border-radius:0 0 10px 10px;padding:15px;line-height:1.8;outline:none;overflow-wrap:anywhere}.rich-editor:focus{border-color:var(--gold)}.rich-editor img,.article img{max-width:100%;height:auto;border-radius:8px}.rich-editor a,.article a{color:#9dccff}.rich-editor h2,.article h2{color:var(--gold)}.article.rich-content{white-space:normal;overflow-wrap:anywhere}.article.rich-content p{margin:0 0 1em}.rich-editor:empty:before{content:attr(data-placeholder);color:#8d9eb1;pointer-events:none}.rich-toolbar button:focus-visible{outline:2px solid var(--gold)}.color-palette{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.color-palette span{font-size:13px;white-space:nowrap}
 </style><script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js" defer></script></head><body><div class="wrap"><header class="top"><div class="brand" id="brand">#252 CROW | 달콩쓰</div><div class="actions"><button class="ghost" id="couponBtn">🎁 쿠폰코드</button><button class="ghost" id="adminBtn">⚙️ 관리자</button></div></header><section class="hero"><div class="small">LAST ASYLUM GUIDE</div><h1>게임 공략</h1><p class="small">초보자부터 숙련자까지, 필요한 공략을 한곳에서</p><div class="search"><input id="search" placeholder="🔍 공략을 검색하세요" aria-label="공략 검색"><button class="btn" id="searchBtn">확인</button></div></section><nav class="cats" id="cats"></nav><section id="postsSection"><div class="section"><h2 id="sectionTitle">전체 공략</h2><span class="small" id="count"></span></div><div class="cards" id="cards"></div></section><section id="calcSection" class="hidden"><div class="section"><h2>🧮 각종 계산기</h2></div><div class="calcgrid"><div class="panel"><h3>전투력 증가 계산기</h3><div class="field"><label>현재 전투력</label><input type="number" id="power" min="0" value="100000"></div><div class="field"><label>증가율 (%)</label><input type="number" id="percent" value="10"></div><p>예상 전투력</p><div class="result" id="powerResult"></div></div><div class="panel"><h3>자원 소요량 계산기</h3><div class="field"><label>1회 소모 자원</label><input type="number" id="unit" min="0" value="500"></div><div class="field"><label>반복 횟수</label><input type="number" id="times" min="0" value="20"></div><p>총 소모량</p><div class="result" id="resourceResult"></div></div></div><p class="small">※ 계산기는 기본 범용 예시입니다. 실제 게임 공식이 확인되면 게임 전용 계산식으로 교체할 수 있습니다.</p></section><footer class="footer">팬 제작 공략 사이트 · 원작 게임과 공식 제휴 관계가 없습니다.</footer></div>
 <div class="modal" id="modal"><div class="dialog"><div class="section"><h2 id="modalTitle">안내</h2><button class="ghost" id="closeModal">닫기 ✕</button></div><div id="modalBody"></div></div></div>
@@ -26,50 +27,49 @@ function editor(p){
  openModal(p?'공략 수정':'새 공략 작성',`<form id="postForm"><div class="field"><label>카테고리</label><select id="postCat">${CATS.filter(c=>c[0]!=='계산기').map(c=>`<option ${p?.category===c[0]?'selected':''}>${esc(c[0])}</option>`).join('')}</select></div><div class="field"><label>제목</label><input id="postTitle" required maxlength="150" value="${esc(p?.title||'')}"></div><div class="field"><label>본문 (블로그형 편집기)</label>${toolbar}<div id="richEditor" class="rich-editor" contenteditable="true" role="textbox" aria-label="공략 본문" aria-multiline="true" data-placeholder="여기에 공략 내용을 작성하세요"></div><input id="richImageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden"><p class="small" id="richStatus">본문에 사진을 넣으려면 커서를 원하는 위치에 놓고 '본문 이미지'를 누르세요.</p></div><div class="field"><label>대표 이미지 파일 (선택, 기존 방식)</label><input id="postImage" type="file" accept="image/png,image/jpeg,image/webp,image/gif"></div><button class="btn" id="postSubmit" type="submit">저장하기</button></form>`);
  const ed=$('richEditor');if(p?.content){if(richContent(p.content)){ed.innerHTML=articleMarkup(p.content)}else{p.content.split('\n').forEach(line=>{const para=document.createElement('p');para.textContent=line||' ';ed.appendChild(para)})}};
   let selectedRange=null,uploading=false;
-  const selectionInside=sel=>sel&&sel.rangeCount&&ed.contains(sel.getRangeAt(0).commonAncestorContainer);
-  function rememberSelection(){const sel=window.getSelection();if(selectionInside(sel))selectedRange=sel.getRangeAt(0).cloneRange()}
-  function focusSelection(){ed.focus({preventScroll:true});if(selectedRange){const sel=window.getSelection();sel.removeAllRanges();try{sel.addRange(selectedRange.cloneRange())}catch(e){console.warn('선택 영역 복원 실패',e)}}}
-  // iOS Safari는 터치 선택 뒤 toolbar에 포커스가 옮겨가므로 selectionchange도 추적합니다.
-  const trackSelection=()=>rememberSelection();
-  document.addEventListener('selectionchange',trackSelection);
-  const observer=new MutationObserver(()=>{if(!ed.isConnected){document.removeEventListener('selectionchange',trackSelection);observer.disconnect()}});
-  observer.observe($('modalBody'),{childList:true});
-  ed.addEventListener('keyup',rememberSelection);
-  ed.addEventListener('mouseup',rememberSelection);
-  ed.addEventListener('touchend',()=>setTimeout(rememberSelection,0),{passive:true});
-  ed.addEventListener('input',rememberSelection);
-  // 버튼을 누르는 순간 에디터의 선택 영역이 사라지지 않게 합니다.
-  $('postForm').querySelectorAll('.rich-toolbar button').forEach(b=>{
-    b.addEventListener('pointerdown',e=>{rememberSelection();if(e.pointerType==='mouse')e.preventDefault()});
-    b.addEventListener('touchstart',rememberSelection,{passive:true});
-  });
-  function wrapSelected(tag,styles){
-    focusSelection();const sel=window.getSelection();if(!selectionInside(sel)||sel.isCollapsed)return false;
-    const range=sel.getRangeAt(0);const wrapper=document.createElement(tag);
-    if(styles)Object.assign(wrapper.style,styles);
-    try{wrapper.appendChild(range.extractContents());range.insertNode(wrapper);const next=document.createRange();next.selectNodeContents(wrapper);sel.removeAllRanges();sel.addRange(next);rememberSelection();return true}catch(err){console.warn('서식 적용 실패',err);return false}
-  }
-  function applyInline(cmd){
-    focusSelection();const sel=window.getSelection();if(!selectionInside(sel))return;
-    // Safari에서 execCommand가 성공을 반환해도 적용되지 않는 경우가 있어 직접 범위를 감쌉니다.
-    if(!sel.isCollapsed && (cmd==='italic'||cmd==='underline')){
-      if(wrapSelected(cmd==='italic'?'em':'u'))return;
+  // A pending style applies to the next typed characters, even after a mobile tap.
+  const pending={bold:false,italic:false,underline:false,color:null};
+  const toolbarRoot=$('postForm').querySelector('.rich-toolbar');
+  const inside=r=>!!r&&ed.contains(r.commonAncestorContainer);
+  function rememberSelection(){const sel=window.getSelection();if(sel&&sel.rangeCount&&inside(sel.getRangeAt(0)))selectedRange=sel.getRangeAt(0).cloneRange()}
+  function restoreSelection(){ed.focus({preventScroll:true});if(!selectedRange)return;const sel=window.getSelection();sel.removeAllRanges();try{sel.addRange(selectedRange.cloneRange())}catch(e){console.warn(e)}}
+  function syncToolbar(){toolbarRoot.querySelectorAll('[data-cmd="bold"],[data-cmd="italic"],[data-cmd="underline"]').forEach(b=>{const on=pending[b.dataset.cmd];b.classList.toggle('format-active',on);b.setAttribute('aria-pressed',String(on))});toolbarRoot.querySelectorAll('[data-text-color]').forEach(b=>{const on=pending.color===b.dataset.textColor;b.classList.toggle('format-active',on);b.setAttribute('aria-pressed',String(on))});$('richStatus').textContent=pending.color||pending.bold||pending.italic||pending.underline?'입력 서식: '+[pending.bold?'굵게':'',pending.italic?'기울임':'',pending.underline?'밑줄':'',pending.color?'글자색 '+pending.color:''].filter(Boolean).join(' · ')+' (버튼을 다시 누르면 해제)':'본문에 사진을 넣으려면 커서를 원하는 위치에 놓고 본문 이미지를 누르세요.'}
+  // Keep a stable range when Safari moves focus to toolbar controls.
+  const trackSelection=()=>rememberSelection();document.addEventListener('selectionchange',trackSelection);
+  const observer=new MutationObserver(()=>{if(!ed.isConnected){document.removeEventListener('selectionchange',trackSelection);observer.disconnect()}});observer.observe($('modalBody'),{childList:true});
+  ['keyup','mouseup','touchend','input'].forEach(type=>ed.addEventListener(type,rememberSelection));
+  toolbarRoot.querySelectorAll('button').forEach(b=>{b.addEventListener('pointerdown',e=>{rememberSelection();if(e.pointerType==='mouse')e.preventDefault()});b.addEventListener('touchstart',rememberSelection,{passive:true})});
+  function selectedTextRange(){if(!selectedRange||selectedRange.collapsed||!inside(selectedRange))return null;return selectedRange.cloneRange()}
+  function applyToSelected(tag,style){const r=selectedTextRange();if(!r)return false;const wrapper=document.createElement(tag);if(style)Object.assign(wrapper.style,style);try{wrapper.appendChild(r.extractContents());r.insertNode(wrapper);const after=document.createRange();after.selectNodeContents(wrapper);selectedRange=after.cloneRange();const sel=window.getSelection();sel.removeAllRanges();sel.addRange(after);ed.dispatchEvent(new Event('input',{bubbles:true}));return true}catch(err){console.warn('선택 서식 실패',err);return false}}
+  function applyFormat(cmd){rememberSelection();if(selectedTextRange()){
+      if(cmd==='italic'||cmd==='underline'||cmd==='bold'){applyToSelected({italic:'em',underline:'u',bold:'strong'}[cmd]);return}
     }
-    document.execCommand(cmd,false,null);rememberSelection();
+    pending[cmd]=!pending[cmd];syncToolbar();
   }
-  $('postForm').querySelectorAll('[data-cmd]').forEach(b=>b.onclick=()=>applyInline(b.dataset.cmd));
-  $('postForm').querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{focusSelection();document.execCommand('formatBlock',false,b.dataset.block);rememberSelection()});
-  // 아이폰 기본 색상 선택창은 텍스트 선택을 해제하므로 터치 가능한 색상 버튼을 사용합니다.
-  function applyColor(value){
-    if(!/^#[0-9a-fA-F]{6}$/.test(value))return;
-    if(wrapSelected('span',{color:value}))return;
-    focusSelection();document.execCommand('foreColor',false,value);rememberSelection();
-  }
-  $('postForm').querySelectorAll('[data-text-color]').forEach(btn=>{
-    btn.addEventListener('touchstart',rememberSelection,{passive:true});
-    btn.addEventListener('pointerdown',e=>{rememberSelection();if(e.pointerType==='mouse')e.preventDefault()});
-    btn.addEventListener('click',()=>applyColor(btn.dataset.textColor));
+  toolbarRoot.querySelectorAll('[data-cmd]').forEach(b=>b.onclick=()=>applyFormat(b.dataset.cmd));
+  toolbarRoot.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{restoreSelection();document.execCommand('formatBlock',false,b.dataset.block);rememberSelection()});
+  toolbarRoot.querySelectorAll('[data-text-color]').forEach(btn=>btn.onclick=()=>{
+    rememberSelection();const color=btn.dataset.textColor;if(!/^#[0-9a-fA-F]{6}$/.test(color))return;
+    if(selectedTextRange()){applyToSelected('span',{color});return}
+    pending.color=pending.color===color?null:color;syncToolbar();
   });
+  // Insert formatted text directly: unlike execCommand, this survives iOS focus changes.
+  // beforeinput handles physical and software keyboards; composition is left to the browser.
+  let composing=false;ed.addEventListener('compositionstart',()=>{composing=true});ed.addEventListener('compositionend',()=>{composing=false});
+  ed.addEventListener('beforeinput',e=>{
+    if(composing||e.isComposing||e.inputType!=='insertText'||!e.data||!(pending.color||pending.bold||pending.italic||pending.underline))return;
+    const sel=window.getSelection();if(!sel||!sel.rangeCount||!inside(sel.getRangeAt(0)))return;
+    e.preventDefault();const r=sel.getRangeAt(0);r.deleteContents();let node=document.createTextNode(e.data);
+    if(pending.bold){const el=document.createElement('strong');el.appendChild(node);node=el}
+    if(pending.italic){const el=document.createElement('em');el.appendChild(node);node=el}
+    if(pending.underline){const el=document.createElement('u');el.appendChild(node);node=el}
+    if(pending.color){const el=document.createElement('span');el.style.color=pending.color;el.appendChild(node);node=el}
+    r.insertNode(node);r.setStartAfter(node);r.collapse(true);sel.removeAllRanges();sel.addRange(r);rememberSelection();ed.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  // On iOS, Korean IME composition does not always expose insertText. For collapsed
+  // selections, create a styled typing container at the caret on focus/tap.
+  ed.addEventListener('focus',()=>{if(!(pending.color||pending.bold||pending.italic||pending.underline))return;});
+  syncToolbar();
  $('richLink').onclick=()=>{rememberSelection();const url=prompt('링크 주소를 입력하세요 (https://...)');if(!url)return;try{const u=new URL(url);if(!['https:','http:'].includes(u.protocol))throw Error();focusSelection();document.execCommand('createLink',false,u.href);rememberSelection()}catch{showNotice('http 또는 https 주소를 입력해 주세요.')}};
  $('richImage').onclick=()=>{rememberSelection();$('richImageFile').click()};
  $('richImageFile').onchange=async()=>{const file=$('richImageFile').files[0];if(!file)return;if(uploading)return;uploading=true;$('postSubmit').disabled=true;$('richStatus').textContent='이미지를 업로드하고 있습니다...';try{const url=await uploadGuideImage(file);focusSelection();const img=document.createElement('img');img.src=url;img.alt=file.name;img.style.maxWidth='100%';const sel=window.getSelection();if(sel&&sel.rangeCount&&ed.contains(sel.anchorNode)){const range=sel.getRangeAt(0);range.deleteContents();range.insertNode(img);range.setStartAfter(img);range.collapse(true);sel.removeAllRanges();sel.addRange(range)}else ed.appendChild(img);ed.appendChild(document.createElement('p'));$('richStatus').textContent='이미지가 본문에 삽입되었습니다.'}catch(err){showNotice(err.message);$('richStatus').textContent='이미지 업로드에 실패했습니다.'}finally{uploading=false;$('postSubmit').disabled=false;$('richImageFile').value=''}};
