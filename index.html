@@ -17,7 +17,33 @@ const CONFIG={
   url:'https://ncfgwsgwohligwwlemcw.supabase.co',
   anonKey:'sb_publishable_65uGXHJw36zlPK0ovhPUOA_trFLWh3j'
 };
-async function init(){if(CONFIG.url&&CONFIG.anonKey){try{const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2');client=createClient(CONFIG.url,CONFIG.anonKey);await load();const {data}=await client.auth.getSession();admin=!!data.session;client.auth.onAuthStateChange((_event,session)=>{admin=!!session;render()})}catch(e){console.error(e);showNotice('데이터 연결에 실패했습니다. 설정을 확인해 주세요.')}}else{posts=JSON.parse(localStorage.getItem('guide-demo-posts')||'[]');}render()}
+async function init(){if(CONFIG.url&&CONFIG.anonKey){try{const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2');client=createClient(CONFIG.url,CONFIG.anonKey);await load();await loadSiteBrand();const {data}=await client.auth.getSession();admin=!!data.session;client.auth.onAuthStateChange((_event,session)=>{admin=!!session;render()})}catch(e){console.error(e);showNotice('데이터 연결에 실패했습니다. 설정을 확인해 주세요.')}}else{posts=JSON.parse(localStorage.getItem('guide-demo-posts')||'[]');}render()}
+const DEFAULT_SITE_BRAND='#252 CROW | 달콩쓰';
+async function loadSiteBrand(){
+  if(!client)return;
+  try{
+    const {data,error}=await client.from('site_settings').select('value').eq('key','site_brand').maybeSingle();
+    if(error){console.warn('사이트 이름 설정을 불러오지 못했습니다:',error.message);return;}
+    if(data&&typeof data.value==='string'&&data.value.trim())$('brand').textContent=data.value;
+  }catch(err){console.warn('사이트 이름 조회 오류:',err)}
+}
+function editSiteBrand(){
+  if(!client||!admin)return;
+  openModal('사이트 이름 변경',`<form id="siteBrandForm"><div class="field"><label for="siteBrandInput">왼쪽 상단에 표시할 문구</label><input id="siteBrandInput" required maxlength="60" value="${esc($('brand').textContent)}" placeholder="사이트 이름을 입력하세요"></div><p class="small">저장하면 모든 방문자의 PC와 모바일 화면에 동일하게 표시됩니다.</p><div class="actions"><button class="btn" id="siteBrandSave" type="submit">저장하기</button><button class="ghost" type="button" id="siteBrandBack">돌아가기</button></div></form>`);
+  $('siteBrandBack').onclick=adminPanel;
+  $('siteBrandForm').onsubmit=async e=>{
+    e.preventDefault();const value=$('siteBrandInput').value.trim();
+    if(!value||value.length>60){showNotice('사이트 이름은 1~60자로 입력해 주세요.');return}
+    const btn=$('siteBrandSave');btn.disabled=true;btn.textContent='저장 중...';
+    try{
+      const {error}=await client.from('site_settings').upsert({key:'site_brand',value},{onConflict:'key'});
+      if(error)throw error;
+      $('brand').textContent=value;
+      showNotice('사이트 이름이 저장되었습니다.');adminPanel();
+    }catch(err){showNotice('저장에 실패했습니다. Supabase SQL 설정을 확인해 주세요.\n'+err.message)}
+    finally{if(document.getElementById('siteBrandSave')){btn.disabled=false;btn.textContent='저장하기'}}
+  };
+}
 function showNotice(msg){alert(msg)}async function load(){if(!client)return;const {data,error}=await client.from('guides').select('*').order('created_at',{ascending:false});if(error)throw error;posts=data||[];render()}
 function render(){const cats=$('cats');cats.innerHTML=CATS.map(([name,emoji])=>`<button class="cat ${category===name?'active':''}" data-cat="${esc(name)}"><span>${emoji}</span>${esc(name)}</button>`).join('');cats.querySelectorAll('button').forEach(b=>b.onclick=()=>{category=category===b.dataset.cat?'':b.dataset.cat;render()});$('calcSection').classList.toggle('hidden',category!=='계산기');$('postsSection').classList.toggle('hidden',category==='계산기');$('sectionTitle').textContent=category||'전체 공략';const filtered=posts.filter(p=>(!category||p.category===category)&&(`${p.title} ${plainSummary(p.content)} ${p.category}`).toLowerCase().includes(query));$('count').textContent=`${filtered.length}개 공략`;$('cards').innerHTML=filtered.length?filtered.map(p=>`<article class="card"><div class="tag">${esc(p.category)}</div><h3>${esc(p.title)}</h3><p>${esc(plainSummary(p.content)).slice(0,110)}${plainSummary(p.content).length>110?'…':''}</p><button class="ghost" data-view="${esc(p.id)}">자세히 보기</button></article>`).join(''):'<div class="empty">등록된 공략이 없습니다. 관리자 페이지에서 첫 공략을 작성해 보세요.</div>';$('cards').querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>view(b.dataset.view))}
 function openModal(title,body){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('modal').classList.add('open')};function closeModal(){$('modal').classList.remove('open')};$('closeModal').onclick=closeModal;$('modal').onclick=e=>{if(e.target===$('modal'))closeModal()};
@@ -77,6 +103,6 @@ function editor(p){
 }
 async function uploadGuideImage(file){if(!client)throw Error('이미지 업로드는 Supabase 연결 후 사용할 수 있습니다.');if(!['image/png','image/jpeg','image/webp','image/gif'].includes(file.type))throw Error('JPG, PNG, WEBP, GIF 이미지만 업로드할 수 있습니다.');if(file.size>5*1024*1024)throw Error('이미지는 5MB 이하로 등록해 주세요.');const path=`${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;const {error}=await client.storage.from('guide-images').upload(path,file,{upsert:false,contentType:file.type});if(error)throw error;return client.storage.from('guide-images').getPublicUrl(path).data.publicUrl}
 function saveDemo(){localStorage.setItem('guide-demo-posts',JSON.stringify(posts));render()}
-function adminPanel(){if(!client){openModal('관리자 데모 모드',`<p class="notice">현재 브라우저에서만 저장되는 테스트 모드입니다. 실제 공개 사이트에서 공용 관리 기능을 사용하려면 Supabase를 연결해야 합니다.</p><button class="btn" id="newPost">새 공략 등록</button>`);$('newPost').onclick=()=>editor();return}if(!admin){openModal('관리자 로그인',`<form id="loginForm"><div class="field"><label>이메일</label><input id="email" type="email" required></div><div class="field"><label>비밀번호</label><input id="password" type="password" required></div><button class="btn">로그인</button></form><p class="small">관리자 계정은 Supabase 대시보드에서 생성합니다.</p>`);$('loginForm').onsubmit=async e=>{e.preventDefault();const {error}=await client.auth.signInWithPassword({email:$('email').value,password:$('password').value});if(error)return showNotice(error.message);closeModal();adminPanel()};return}openModal('관리자 페이지',`<p>등록된 공략: ${posts.length}개</p><div class="actions"><button class="btn" id="newPost">새 공략 등록</button><button class="ghost" id="logout">로그아웃</button></div><p class="small">기존 공략은 목록에서 자세히 보기 → 수정/삭제로 관리할 수 있습니다.</p>`);$('newPost').onclick=()=>editor();$('logout').onclick=async()=>{await client.auth.signOut();closeModal()}}
+function adminPanel(){if(!client){openModal('관리자 데모 모드',`<p class="notice">현재 브라우저에서만 저장되는 테스트 모드입니다. 실제 공개 사이트에서 공용 관리 기능을 사용하려면 Supabase를 연결해야 합니다.</p><button class="btn" id="newPost">새 공략 등록</button>`);$('newPost').onclick=()=>editor();return}if(!admin){openModal('관리자 로그인',`<form id="loginForm"><div class="field"><label>이메일</label><input id="email" type="email" required></div><div class="field"><label>비밀번호</label><input id="password" type="password" required></div><button class="btn">로그인</button></form><p class="small">관리자 계정은 Supabase 대시보드에서 생성합니다.</p>`);$('loginForm').onsubmit=async e=>{e.preventDefault();const {error}=await client.auth.signInWithPassword({email:$('email').value,password:$('password').value});if(error)return showNotice(error.message);closeModal();adminPanel()};return}openModal('관리자 페이지',`<p>등록된 공략: ${posts.length}개</p><div class="actions"><button class="btn" id="newPost">새 공략 등록</button><button class="ghost" id="editSiteBrand">✏️ 사이트 이름 변경</button><button class="ghost" id="logout">로그아웃</button></div><p class="small">기존 공략은 목록에서 자세히 보기 → 수정/삭제로 관리할 수 있습니다.</p>`);$('newPost').onclick=()=>editor();$('editSiteBrand').onclick=editSiteBrand;$('logout').onclick=async()=>{await client.auth.signOut();closeModal()}}
 $('adminBtn').onclick=adminPanel;$('couponBtn').onclick=()=>openModal('🎁 쿠폰코드','<p>쿠폰코드 게시판은 관리자 기능에서 추후 확장할 수 있습니다.</p>');function search(){query=$('search').value.trim().toLowerCase();if(category==='계산기')category='';render()}$('searchBtn').onclick=search;$('search').onkeydown=e=>{if(e.key==='Enter')search()};for(const id of ['power','percent','unit','times'])$(id).oninput=calc;function calc(){const power=Number($('power').value)||0,percent=Number($('percent').value)||0,unit=Number($('unit').value)||0,times=Number($('times').value)||0;$('powerResult').textContent=Math.round(power*(1+percent/100)).toLocaleString('ko-KR');$('resourceResult').textContent=(unit*times).toLocaleString('ko-KR')}calc();init();
 </script></body></html>
