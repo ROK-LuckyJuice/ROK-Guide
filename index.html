@@ -4,6 +4,23 @@
 /* 블로그형 공략 편집기 */
 .rich-toolbar button.format-active{outline:3px solid #e7c278;outline-offset:1px;box-shadow:0 0 0 2px #182334 inset}.color-palette{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 .rich-toolbar{display:flex;flex-wrap:wrap;gap:6px;padding:9px;background:#101b2b;border:1px solid var(--edge);border-radius:10px 10px 0 0}.rich-toolbar button,.rich-toolbar select,.rich-toolbar input[type=color]{min-height:34px;padding:5px 9px;border:1px solid #536078;background:#26374a;color:white;border-radius:7px}.rich-toolbar input[type=color]{width:42px;padding:3px}.rich-editor{min-height:240px;max-height:52vh;overflow:auto;background:#0f1927;border:1px solid var(--edge);border-top:0;border-radius:0 0 10px 10px;padding:15px;line-height:1.8;outline:none;overflow-wrap:anywhere}.rich-editor:focus{border-color:var(--gold)}.rich-editor img,.article img{max-width:100%;height:auto;border-radius:8px}.rich-editor a,.article a{color:#9dccff}.rich-editor h2,.article h2{color:var(--gold)}.article.rich-content{white-space:normal;overflow-wrap:anywhere}.article.rich-content p{margin:0 0 1em}.rich-editor:empty:before{content:attr(data-placeholder);color:#8d9eb1;pointer-events:none}.rich-toolbar button:focus-visible{outline:2px solid var(--gold)}.color-palette{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.color-palette span{font-size:13px;white-space:nowrap}
+
+/* 공략 목록 카드 개선: 기존 데이터 및 편집기 유지 */
+.cards{align-items:stretch}
+.card.guide-card{padding:0;overflow:hidden;display:flex;flex-direction:column;min-width:0;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;cursor:pointer}
+.card.guide-card:hover{transform:translateY(-3px);border-color:#b99554;box-shadow:0 12px 26px #0004}
+.card.guide-card:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.guide-cover{aspect-ratio:16/9;overflow:hidden;background:linear-gradient(135deg,#34465c,#172335);display:flex;align-items:center;justify-content:center;position:relative}
+.guide-cover img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .25s ease}
+.guide-card:hover .guide-cover img{transform:scale(1.035)}
+.guide-cover-placeholder{font-size:52px;line-height:1;text-shadow:0 4px 12px #0007}
+.guide-card-body{padding:18px 19px 20px;display:flex;flex-direction:column;flex:1;gap:9px}
+.guide-card .tag{font-weight:700;letter-spacing:.02em}
+.guide-card h3{margin:0;font-size:19px;line-height:1.45;overflow-wrap:anywhere}
+.guide-card p{margin:0;line-height:1.6;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;min-height:3.2em;overflow-wrap:anywhere}
+.guide-card .guide-open{margin-top:auto;align-self:flex-start;color:var(--gold);font-size:13px;font-weight:800;padding-top:7px}
+@media(max-width:700px){.guide-card-body{padding:17px}.guide-cover-placeholder{font-size:48px}}
+@media(prefers-reduced-motion:reduce){.card.guide-card,.guide-cover img{transition:none}}
 </style><script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js" defer></script></head><body><div class="wrap"><header class="top"><div class="brand" id="brand">#252 CROW | 달콩쓰</div><div class="actions"><button class="ghost" id="couponBtn">🎁 쿠폰코드</button><button class="ghost" id="adminBtn">⚙️ 관리자</button></div></header><section class="hero"><div class="small">LAST ASYLUM GUIDE</div><h1>게임 공략</h1><p class="small">초보자부터 숙련자까지, 필요한 공략을 한곳에서</p><div class="search"><input id="search" placeholder="🔍 공략을 검색하세요" aria-label="공략 검색"><button class="btn" id="searchBtn">확인</button></div></section><nav class="cats" id="cats"></nav><section id="postsSection"><div class="section"><h2 id="sectionTitle">전체 공략</h2><span class="small" id="count"></span></div><div class="cards" id="cards"></div></section><section id="calcSection" class="hidden"><div class="section"><h2>🧮 각종 계산기</h2></div><div class="calcgrid"><div class="panel"><h3>전투력 증가 계산기</h3><div class="field"><label>현재 전투력</label><input type="number" id="power" min="0" value="100000"></div><div class="field"><label>증가율 (%)</label><input type="number" id="percent" value="10"></div><p>예상 전투력</p><div class="result" id="powerResult"></div></div><div class="panel"><h3>자원 소요량 계산기</h3><div class="field"><label>1회 소모 자원</label><input type="number" id="unit" min="0" value="500"></div><div class="field"><label>반복 횟수</label><input type="number" id="times" min="0" value="20"></div><p>총 소모량</p><div class="result" id="resourceResult"></div></div></div><p class="small">※ 계산기는 기본 범용 예시입니다. 실제 게임 공식이 확인되면 게임 전용 계산식으로 교체할 수 있습니다.</p></section><footer class="footer">팬 제작 공략 사이트 · 원작 게임과 공식 제휴 관계가 없습니다.</footer></div>
 <div class="modal" id="modal"><div class="dialog"><div class="section"><h2 id="modalTitle">안내</h2><button class="ghost" id="closeModal">닫기 ✕</button></div><div id="modalBody"></div></div></div>
 <script>
@@ -45,7 +62,37 @@ function editSiteBrand(){
   };
 }
 function showNotice(msg){alert(msg)}async function load(){if(!client)return;const {data,error}=await client.from('guides').select('*').order('created_at',{ascending:false});if(error)throw error;posts=data||[];render()}
-function render(){const cats=$('cats');cats.innerHTML=CATS.map(([name,emoji])=>`<button class="cat ${category===name?'active':''}" data-cat="${esc(name)}"><span>${emoji}</span>${esc(name)}</button>`).join('');cats.querySelectorAll('button').forEach(b=>b.onclick=()=>{category=category===b.dataset.cat?'':b.dataset.cat;render()});$('calcSection').classList.toggle('hidden',category!=='계산기');$('postsSection').classList.toggle('hidden',category==='계산기');$('sectionTitle').textContent=category||'전체 공략';const filtered=posts.filter(p=>(!category||p.category===category)&&(`${p.title} ${plainSummary(p.content)} ${p.category}`).toLowerCase().includes(query));$('count').textContent=`${filtered.length}개 공략`;$('cards').innerHTML=filtered.length?filtered.map(p=>`<article class="card"><div class="tag">${esc(p.category)}</div><h3>${esc(p.title)}</h3><p>${esc(plainSummary(p.content)).slice(0,110)}${plainSummary(p.content).length>110?'…':''}</p><button class="ghost" data-view="${esc(p.id)}">자세히 보기</button></article>`).join(''):'<div class="empty">등록된 공략이 없습니다. 관리자 페이지에서 첫 공략을 작성해 보세요.</div>';$('cards').querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>view(b.dataset.view))}
+const GUIDE_ICONS={'초보자 가이드':'🌱','영웅':'👑','길드전':'⚔️','전사':'🛡️','레인저':'🏹','기타 공략':'📖','마법사':'🔮'};
+function guideCover(p){
+  // 기존 대표 이미지가 우선이며, 없으면 본문에 삽입된 첫 번째 이미지 사용.
+  if(typeof p.image_url==='string'&&/^https:\/\//i.test(p.image_url))return p.image_url;
+  if(!richContent(p.content))return '';
+  const wrapper=document.createElement('div');wrapper.innerHTML=articleMarkup(p.content);
+  const img=wrapper.querySelector('img[src]');
+  const url=img?.getAttribute('src')||'';
+  return /^https:\/\//i.test(url)?url:'';
+}
+function render(){
+  const cats=$('cats');
+  cats.innerHTML=CATS.map(([name,emoji])=>`<button class="cat ${category===name?'active':''}" data-cat="${esc(name)}"><span>${emoji}</span>${esc(name)}</button>`).join('');
+  cats.querySelectorAll('button').forEach(b=>b.onclick=()=>{category=category===b.dataset.cat?'':b.dataset.cat;render()});
+  $('calcSection').classList.toggle('hidden',category!=='계산기');
+  $('postsSection').classList.toggle('hidden',category==='계산기');
+  $('sectionTitle').textContent=category||'전체 공략';
+  const filtered=posts.filter(p=>(!category||p.category===category)&&(`${p.title} ${plainSummary(p.content)} ${p.category}`).toLowerCase().includes(query));
+  $('count').textContent=`${filtered.length}개 공략`;
+  $('cards').innerHTML=filtered.length?filtered.map(p=>{
+    const summary=plainSummary(p.content).replace(/\s+/g,' ').trim();
+    const excerpt=summary.length>115?summary.slice(0,115)+'…':summary;
+    const cover=guideCover(p);
+    const coverMarkup=cover?`<img src="${esc(cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.hidden=false"><span class="guide-cover-placeholder" hidden aria-hidden="true">${GUIDE_ICONS[p.category]||'📖'}</span>`:`<span class="guide-cover-placeholder" aria-hidden="true">${GUIDE_ICONS[p.category]||'📖'}</span>`;
+    return `<article class="card guide-card" tabindex="0" role="button" aria-label="${esc(p.title)} 공략 자세히 보기" data-view="${esc(p.id)}"><div class="guide-cover">${coverMarkup}</div><div class="guide-card-body"><div class="tag">${esc(p.category)}</div><h3>${esc(p.title)}</h3><p>${esc(excerpt||'공략 내용을 확인해 보세요.')}</p><span class="guide-open">자세히 보기 ›</span></div></article>`;
+  }).join(''):'<div class="empty">등록된 공략이 없습니다. 관리자 페이지에서 첫 공략을 작성해 보세요.</div>';
+  $('cards').querySelectorAll('[data-view]').forEach(card=>{
+    card.onclick=()=>view(card.dataset.view);
+    card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();view(card.dataset.view)}};
+  });
+}
 function openModal(title,body){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('modal').classList.add('open')};function closeModal(){$('modal').classList.remove('open')};$('closeModal').onclick=closeModal;$('modal').onclick=e=>{if(e.target===$('modal'))closeModal()};
 function view(id){const p=posts.find(p=>String(p.id)===String(id));if(!p)return;openModal(p.title,`<p class="tag">${esc(p.category)}</p><div class="article ${richContent(p.content)?'rich-content':''}">${articleMarkup(p.content)}</div>${p.image_url?`<p><img style="max-width:100%" src="${esc(p.image_url)}" alt="공략 첨부 이미지"></p>`:''}${admin?`<hr><div class="actions"><button class="ghost" id="editPost">수정</button><button class="ghost" id="deletePost">삭제</button></div>`:''}`);if(admin){$('editPost').onclick=()=>editor(p);$('deletePost').onclick=async()=>{if(!confirm('정말 삭제할까요?'))return;try{if(client){const {error}=await client.from('guides').delete().eq('id',p.id);if(error)throw error;await load()}else{posts=posts.filter(x=>x.id!==p.id);saveDemo()}closeModal()}catch(e){showNotice(e.message)}}}}
 function editor(p){
