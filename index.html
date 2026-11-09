@@ -34,6 +34,7 @@
 .draft-manager .ghost{padding:8px 11px}
 
 /* 관리자 공략 관리 목록 */
+.admin-guide-item .order-actions{display:flex;gap:5px;flex-wrap:wrap}.admin-guide-item .order-actions button{padding:7px 9px}.pin-label{color:#e7c278;font-size:12px;font-weight:700}
 .admin-guide-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,180px);gap:8px;margin:14px 0}
 .admin-guide-controls input,.admin-guide-controls select{width:100%;min-width:0}
 .admin-guide-list{display:grid;gap:9px;max-height:48vh;overflow:auto}
@@ -81,7 +82,8 @@ function editSiteBrand(){
     finally{if(document.getElementById('siteBrandSave')){btn.disabled=false;btn.textContent='저장하기'}}
   };
 }
-function showNotice(msg){alert(msg)}async function load(){if(!client)return;const {data,error}=await client.from('guides').select('*').order('created_at',{ascending:false});if(error)throw error;posts=data||[];render()}
+function showNotice(msg){alert(msg)}async function load(){if(!client)return;const {data,error}=await client.from('guides').select('*').order('created_at',{ascending:false});if(error)throw error;posts=data||[];sortGuides();render()}
+function sortGuides(){posts.sort((a,b)=>Number(!!b.is_pinned)-Number(!!a.is_pinned)||((a.sort_order??Number.MAX_SAFE_INTEGER)-(b.sort_order??Number.MAX_SAFE_INTEGER))||String(b.created_at||'').localeCompare(String(a.created_at||'')))}
 const GUIDE_ICONS={'초보자 가이드':'🌱','영웅':'👑','길드전':'⚔️','전사':'🛡️','레인저':'🏹','기타 공략':'📖','마법사':'🔮'};
 function guideCover(p){
   // 기존 대표 이미지가 우선이며, 없으면 본문에 삽입된 첫 번째 이미지 사용.
@@ -106,7 +108,7 @@ function render(){
     const excerpt=summary.length>115?summary.slice(0,115)+'…':summary;
     const cover=guideCover(p);
     const coverMarkup=cover?`<img src="${esc(cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.hidden=false"><span class="guide-cover-placeholder" hidden aria-hidden="true">${GUIDE_ICONS[p.category]||'📖'}</span>`:`<span class="guide-cover-placeholder" aria-hidden="true">${GUIDE_ICONS[p.category]||'📖'}</span>`;
-    return `<article class="card guide-card" tabindex="0" role="button" aria-label="${esc(p.title)} 공략 자세히 보기" data-view="${esc(p.id)}"><div class="guide-cover">${coverMarkup}</div><div class="guide-card-body"><div class="tag">${esc(p.category)}</div><h3>${esc(p.title)}</h3><p>${esc(excerpt||'공략 내용을 확인해 보세요.')}</p><span class="guide-open">자세히 보기 ›</span></div></article>`;
+    return `<article class="card guide-card" tabindex="0" role="button" aria-label="${esc(p.title)} 공략 자세히 보기" data-view="${esc(p.id)}"><div class="guide-cover">${coverMarkup}</div><div class="guide-card-body"><div class="tag">${p.is_pinned?'📌 상단 고정 · ':''}${esc(p.category)}</div><h3>${esc(p.title)}</h3><p>${esc(excerpt||'공략 내용을 확인해 보세요.')}</p><span class="guide-open">자세히 보기 ›</span></div></article>`;
   }).join(''):'<div class="empty">등록된 공략이 없습니다. 관리자 페이지에서 첫 공략을 작성해 보세요.</div>';
   $('cards').querySelectorAll('[data-view]').forEach(card=>{
     card.onclick=()=>view(card.dataset.view);
@@ -239,16 +241,36 @@ async function deleteGuideFromAdmin(p){
   adminGuideList();
  }catch(e){showNotice('삭제에 실패했습니다. '+e.message)}
 }
+async function toggleGuidePin(p){
+ if(!admin||!client)return;
+ try{const {error}=await client.from('guides').update({is_pinned:!p.is_pinned}).eq('id',p.id);if(error)throw error;await load();adminGuideList()}
+ catch(e){showNotice('상단 고정 변경 실패: '+e.message)}
+}
+async function moveGuide(p,direction){
+ if(!admin||!client)return;
+ const group=posts.filter(x=>!!x.is_pinned===!!p.is_pinned);
+ const index=group.findIndex(x=>String(x.id)===String(p.id));const other=index+direction;
+ if(index<0||other<0||other>=group.length)return;
+ [group[index],group[other]]=[group[other],group[index]];
+ const targetPinned=!!p.is_pinned;
+ let cursor=0;const final=posts.map(x=>!!x.is_pinned===targetPinned?group[cursor++]:x);
+ const order=final.map((x,i)=>({id:String(x.id),position:i}));
+ try{const {error}=await client.rpc('set_guide_order',{p_order:order});if(error)throw error;await load();adminGuideList()}
+ catch(e){showNotice('순서 변경 실패: '+e.message)}
+}
 function adminGuideList(){
  if(!admin){adminPanel();return}
- openModal('공략 관리 목록',`<p class="small">등록된 공략을 검색하고 바로 수정하거나 삭제할 수 있습니다.</p><div class="admin-guide-controls"><input id="adminGuideSearch" type="search" placeholder="🔍 공략 제목 검색" aria-label="공략 제목 검색"><select id="adminGuideCategory" aria-label="카테고리 필터"><option value="">전체 카테고리</option>${CATS.filter(c=>c[0]!=='계산기').map(c=>`<option value="${esc(c[0])}">${esc(c[0])}</option>`).join('')}</select></div><p class="small" id="adminGuideCount"></p><div class="admin-guide-list" id="adminGuideItems"></div><div class="actions" style="margin-top:16px"><button class="ghost" type="button" id="adminGuideBack">← 관리자 페이지</button></div>`);
+ openModal('공략 관리 목록',`<p class="small">공략을 상단 고정하거나 ▲ ▼ 버튼으로 같은 그룹 내 순서를 바꿀 수 있습니다. 순서는 모든 방문자에게 적용됩니다.</p><div class="admin-guide-controls"><input id="adminGuideSearch" type="search" placeholder="🔍 공략 제목 검색" aria-label="공략 제목 검색"><select id="adminGuideCategory" aria-label="카테고리 필터"><option value="">전체 카테고리</option>${CATS.filter(c=>c[0]!=='계산기').map(c=>`<option value="${esc(c[0])}">${esc(c[0])}</option>`).join('')}</select></div><p class="small" id="adminGuideCount"></p><div class="admin-guide-list" id="adminGuideItems"></div><div class="actions" style="margin-top:16px"><button class="ghost" type="button" id="adminGuideBack">← 관리자 페이지</button></div>`);
  $('adminGuideBack').onclick=adminPanel;
  const update=()=>{
   const q=$('adminGuideSearch').value.trim().toLocaleLowerCase('ko-KR'),cat=$('adminGuideCategory').value;
   const list=posts.filter(p=>(!cat||p.category===cat)&&String(p.title||'').toLocaleLowerCase('ko-KR').includes(q));
   $('adminGuideCount').textContent=`검색 결과 ${list.length}개 / 전체 ${posts.length}개`;
-  $('adminGuideItems').innerHTML=list.map(p=>`<div class="admin-guide-item"><div class="admin-guide-info"><span class="tag">${esc(p.category)}</span><strong>${esc(p.title)}</strong><span class="small">${p.created_at?esc(new Date(p.created_at).toLocaleDateString('ko-KR')):'등록된 공략'}</span></div><div class="actions"><button class="ghost" type="button" data-admin-view="${esc(p.id)}">보기</button><button class="ghost" type="button" data-admin-edit="${esc(p.id)}">수정</button><button class="ghost" type="button" data-admin-delete="${esc(p.id)}">삭제</button></div></div>`).join('')||'<p class="notice">검색 결과가 없습니다.</p>';
-  $('adminGuideItems').querySelectorAll('[data-admin-view]').forEach(b=>b.onclick=()=>view(b.dataset.adminView));
+  $('adminGuideItems').innerHTML=list.map(p=>`<div class="admin-guide-item"><div class="admin-guide-info"><span class="tag">${esc(p.category)}</span>${p.is_pinned?'<span class="pin-label"> 📌 상단 고정</span>':''}<strong>${esc(p.title)}</strong><span class="small">${p.created_at?esc(new Date(p.created_at).toLocaleDateString('ko-KR')):'등록된 공략'}</span></div><div class="actions order-actions"><button class="ghost" type="button" data-admin-pin="${esc(p.id)}">${p.is_pinned?'📌 고정 해제':'📌 상단 고정'}</button><button class="ghost" type="button" data-admin-up="${esc(p.id)}" title="위로 이동">▲</button><button class="ghost" type="button" data-admin-down="${esc(p.id)}" title="아래로 이동">▼</button><button class="ghost" type="button" data-admin-view="${esc(p.id)}">보기</button><button class="ghost" type="button" data-admin-edit="${esc(p.id)}">수정</button><button class="ghost" type="button" data-admin-delete="${esc(p.id)}">삭제</button></div></div>`).join('')||'<p class="notice">검색 결과가 없습니다.</p>';
+  $('adminGuideItems').querySelectorAll('[data-admin-pin]').forEach(b=>b.onclick=()=>{const p=posts.find(x=>String(x.id)===b.dataset.adminPin);if(p)toggleGuidePin(p)});
+   $('adminGuideItems').querySelectorAll('[data-admin-up]').forEach(b=>b.onclick=()=>{const p=posts.find(x=>String(x.id)===b.dataset.adminUp);if(p)moveGuide(p,-1)});
+   $('adminGuideItems').querySelectorAll('[data-admin-down]').forEach(b=>b.onclick=()=>{const p=posts.find(x=>String(x.id)===b.dataset.adminDown);if(p)moveGuide(p,1)});
+   $('adminGuideItems').querySelectorAll('[data-admin-view]').forEach(b=>b.onclick=()=>view(b.dataset.adminView));
   $('adminGuideItems').querySelectorAll('[data-admin-edit]').forEach(b=>b.onclick=()=>{const post=posts.find(p=>String(p.id)===b.dataset.adminEdit);if(post)editor(post)});
   $('adminGuideItems').querySelectorAll('[data-admin-delete]').forEach(b=>b.onclick=()=>{const post=posts.find(p=>String(p.id)===b.dataset.adminDelete);if(post)deleteGuideFromAdmin(post)});
  };
