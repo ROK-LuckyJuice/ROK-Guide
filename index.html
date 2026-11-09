@@ -27,6 +27,12 @@
 .cover-empty{padding:25px 12px;text-align:center;color:var(--muted);border:1px dashed var(--edge);border-radius:9px}
 .cover-hint{font-size:12px;color:var(--muted);line-height:1.6}
 
+/* 공략 임시저장 및 복구 */
+.draft-manager{display:grid;gap:9px;padding:12px;margin:12px 0;background:#102538;border:1px solid #536078;border-radius:12px}
+.draft-manager .actions{align-items:center}
+.draft-status{font-size:12px;color:var(--muted);line-height:1.5}
+.draft-manager .ghost{padding:8px 11px}
+
 /* 관리자 공략 관리 목록 */
 .admin-guide-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,180px);gap:8px;margin:14px 0}
 .admin-guide-controls input,.admin-guide-controls select{width:100%;min-width:0}
@@ -107,11 +113,12 @@ function render(){
     card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();view(card.dataset.view)}};
   });
 }
-function openModal(title,body){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('modal').classList.add('open')};function closeModal(){$('modal').classList.remove('open')};$('closeModal').onclick=closeModal;$('modal').onclick=e=>{if(e.target===$('modal'))closeModal()};
+let activeDraftFlush=null;
+function openModal(title,body){if(activeDraftFlush)activeDraftFlush();$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('modal').classList.add('open')};function closeModal(){if(activeDraftFlush)activeDraftFlush();$('modal').classList.remove('open')};$('closeModal').onclick=closeModal;$('modal').onclick=e=>{if(e.target===$('modal'))closeModal()};
 function view(id){const p=posts.find(p=>String(p.id)===String(id));if(!p)return;openModal(p.title,`<p class="tag">${esc(p.category)}</p><div class="article ${richContent(p.content)?'rich-content':''}">${articleMarkup(p.content)}</div>${p.image_url?`<p><img style="max-width:100%" src="${esc(p.image_url)}" alt="공략 첨부 이미지"></p>`:''}${admin?`<hr><div class="actions"><button class="ghost" id="editPost">수정</button><button class="ghost" id="deletePost">삭제</button></div>`:''}`);if(admin){$('editPost').onclick=()=>editor(p);$('deletePost').onclick=async()=>{if(!confirm('정말 삭제할까요?'))return;try{if(client){const {error}=await client.from('guides').delete().eq('id',p.id);if(error)throw error;await load()}else{posts=posts.filter(x=>x.id!==p.id);saveDemo()}closeModal()}catch(e){showNotice(e.message)}}}}
 function editor(p){
  const toolbar=`<div class="rich-toolbar" role="toolbar" aria-label="본문 서식"><button type="button" data-cmd="bold" title="굵게"><b>굵게</b></button><button type="button" data-cmd="italic" title="기울임"><i>기울임</i></button><button type="button" data-cmd="underline" title="밑줄"><u>밑줄</u></button><button type="button" data-block="p">본문</button><button type="button" data-block="h2">큰 제목</button><button type="button" data-block="h3">작은 제목</button><button type="button" data-cmd="insertUnorderedList">• 목록</button><button type="button" data-cmd="insertOrderedList">1. 목록</button><button type="button" id="richLink">🔗 링크</button><button type="button" id="richImage">🖼️ 본문 이미지</button><span class="color-palette"><span>글자색</span><button type="button" data-text-color="#ffffff" title="흰색" aria-label="글자색 흰색" style="background:#ffffff;width:30px;height:30px;min-height:30px;padding:0;border:2px solid #a8b6c8;border-radius:50%"></button><button type="button" data-text-color="#e7c278" title="금색" aria-label="글자색 금색" style="background:#e7c278;width:30px;height:30px;min-height:30px;padding:0;border:2px solid #a8b6c8;border-radius:50%"></button><button type="button" data-text-color="#ff5555" title="빨강" aria-label="글자색 빨강" style="background:#ff5555;width:30px;height:30px;min-height:30px;padding:0;border:2px solid #a8b6c8;border-radius:50%"></button><button type="button" data-text-color="#ffe45c" title="노랑" aria-label="글자색 노랑" style="background:#ffe45c;width:30px;height:30px;min-height:30px;padding:0;border:2px solid #a8b6c8;border-radius:50%"></button><button type="button" data-text-color="#58db88" title="초록" aria-label="글자색 초록" style="background:#58db88;width:30px;height:30px;min-height:30px;padding:0;border:2px solid #a8b6c8;border-radius:50%"></button><button type="button" data-text-color="#6bbaff" title="파랑" aria-label="글자색 파랑" style="background:#6bbaff;width:30px;height:30px;min-height:30px;padding:0;border:2px solid #a8b6c8;border-radius:50%"></button><button type="button" data-text-color="#d7a1ff" title="보라" aria-label="글자색 보라" style="background:#d7a1ff;width:30px;height:30px;min-height:30px;padding:0;border:2px solid #a8b6c8;border-radius:50%"></button></span></div>`;
- openModal(p?'공략 수정':'새 공략 작성',`<form id="postForm"><div class="field"><label>카테고리</label><select id="postCat">${CATS.filter(c=>c[0]!=='계산기').map(c=>`<option ${p?.category===c[0]?'selected':''}>${esc(c[0])}</option>`).join('')}</select></div><div class="field"><label>제목</label><input id="postTitle" required maxlength="150" value="${esc(p?.title||'')}"></div><div class="field"><label>본문 (블로그형 편집기)</label>${toolbar}<div id="richEditor" class="rich-editor" contenteditable="true" role="textbox" aria-label="공략 본문" aria-multiline="true" data-placeholder="여기에 공략 내용을 작성하세요"></div><input id="richImageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden"><p class="small" id="richStatus">본문에 사진을 넣으려면 커서를 원하는 위치에 놓고 '본문 이미지'를 누르세요.</p></div><div class="field"><label>대표 이미지 관리</label><div class="cover-manager"><div id="coverPreview" aria-live="polite"></div><input id="postImage" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><div class="actions"><button type="button" class="ghost" id="removeCover">대표 이미지 삭제</button><button type="button" class="ghost" id="cancelCoverChange">변경 취소</button></div><div class="cover-hint">새 이미지를 선택하면 미리보기가 바뀝니다. 실제 변경·삭제는 아래 저장하기를 눌러야 반영됩니다. 대표 이미지 삭제는 본문 이미지나 저장소 원본 파일을 삭제하지 않습니다.</div></div></div><button class="btn" id="postSubmit" type="submit">저장하기</button></form>`);
+ openModal(p?'공략 수정':'새 공략 작성',`<form id="postForm"><div class="field"><label>카테고리</label><select id="postCat">${CATS.filter(c=>c[0]!=='계산기').map(c=>`<option ${p?.category===c[0]?'selected':''}>${esc(c[0])}</option>`).join('')}</select></div><div class="field"><label>제목</label><input id="postTitle" required maxlength="150" value="${esc(p?.title||'')}"></div><div class="field"><label>본문 (블로그형 편집기)</label>${toolbar}<div id="richEditor" class="rich-editor" contenteditable="true" role="textbox" aria-label="공략 본문" aria-multiline="true" data-placeholder="여기에 공략 내용을 작성하세요"></div><input id="richImageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden"><p class="small" id="richStatus">본문에 사진을 넣으려면 커서를 원하는 위치에 놓고 '본문 이미지'를 누르세요.</p></div><div class="field"><label>대표 이미지 관리</label><div class="cover-manager"><div id="coverPreview" aria-live="polite"></div><input id="postImage" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><div class="actions"><button type="button" class="ghost" id="removeCover">대표 이미지 삭제</button><button type="button" class="ghost" id="cancelCoverChange">변경 취소</button></div><div class="cover-hint">새 이미지를 선택하면 미리보기가 바뀝니다. 실제 변경·삭제는 아래 저장하기를 눌러야 반영됩니다. 대표 이미지 삭제는 본문 이미지나 저장소 원본 파일을 삭제하지 않습니다.</div></div></div><div class="draft-manager"><strong>📝 공략 임시저장</strong><div class="draft-status" id="draftStatus" aria-live="polite">작성 내용을 이 브라우저에 자동으로 임시저장합니다.</div><div class="actions"><button type="button" class="ghost" id="draftSave">지금 임시저장</button><button type="button" class="ghost" id="draftRestore">임시저장 복구</button><button type="button" class="ghost" id="draftDelete">임시저장 삭제</button></div><div class="cover-hint">임시저장은 현재 브라우저에만 저장됩니다. 파일 선택 상태는 복구되지 않으며, 다른 기기나 시크릿 모드에서는 확인할 수 없습니다.</div></div><button class="btn" id="postSubmit" type="submit">저장하기</button></form>`);
   // 대표 이미지는 저장 전까지 DB를 수정하지 않습니다.
   let coverRemoved=false,coverObjectUrl=null;
   const initialCover=(typeof p?.image_url==='string'&&/^https:\/\//i.test(p.image_url))?p.image_url:'';
@@ -132,6 +139,49 @@ function editor(p){
   let selectedRange=null,uploading=false;
   // A pending style applies to the next typed characters, even after a mobile tap.
   const pending={bold:false,italic:false,underline:false,color:null};
+  // 공략별 임시저장: 새 공략과 기존 공략의 저장 공간을 분리합니다.
+  const draftKey='rok-guide-draft-v1:'+(p?'edit:'+String(p.id):'new');
+  let draftTimer=null,draftDirty=false,draftEnabled=true;
+  const draftStatus=$('draftStatus');
+  function readDraft(){try{const raw=localStorage.getItem(draftKey);if(!raw)return null;const obj=JSON.parse(raw);return obj&&obj.version===1&&typeof obj.html==='string'?obj:null}catch(e){console.warn('임시저장 읽기 실패',e);return null}}
+  function draftStatusText(message){if(draftStatus.isConnected)draftStatus.textContent=message}
+  function draftSnapshot(){return {version:1,title:$('postTitle').value,category:$('postCat').value,html:ed.innerHTML,coverRemoved,savedAt:new Date().toISOString()}}
+  function saveDraft(force=false){
+    if(!draftEnabled||!$('postForm')?.isConnected||(!draftDirty&&!force))return false;
+    if(draftTimer){clearTimeout(draftTimer);draftTimer=null}
+    try{localStorage.setItem(draftKey,JSON.stringify(draftSnapshot()));draftDirty=false;draftStatusText('임시저장 완료 · '+new Date().toLocaleString('ko-KR'));return true}
+    catch(e){console.warn('임시저장 실패',e);draftStatusText('임시저장 실패: 브라우저 저장 공간이나 설정을 확인하세요.');return false}
+  }
+  function queueDraft(){if(!draftEnabled)return;draftDirty=true;draftStatusText('변경 사항 저장 대기 중…');if(draftTimer)clearTimeout(draftTimer);draftTimer=setTimeout(()=>saveDraft(),800)}
+  function restoreDraft(d){
+    $('postTitle').value=d.title||'';
+    if([...$('postCat').options].some(o=>o.value===d.category))$('postCat').value=d.category;
+    try{ed.innerHTML=cleanRich(d.html)}catch(e){ed.textContent=d.html}
+    coverRemoved=!!d.coverRemoved;$('postImage').value='';updateCoverPreview();
+    draftDirty=false;draftStatusText('임시저장 내용을 복구했습니다. 필요하면 정식 저장하기를 누르세요.');
+  }
+  function clearDraft(){if(draftTimer){clearTimeout(draftTimer);draftTimer=null}try{localStorage.removeItem(draftKey)}catch(e){console.warn(e)}draftDirty=false}
+  const existingDraft=readDraft();
+  if(existingDraft){
+    const date=existingDraft.savedAt?new Date(existingDraft.savedAt).toLocaleString('ko-KR'):'날짜 미상';
+    if(confirm('이전에 작성하던 임시저장 내용이 있습니다.\n저장 시각: '+date+'\n\n복구하시겠습니까?\n취소를 누르면 현재 공략 내용으로 시작합니다.'))restoreDraft(existingDraft);
+    else draftStatusText('기존 임시저장이 남아 있습니다. 필요하면 「임시저장 복구」를 누르세요.');
+  }
+  $('draftSave').onclick=()=>saveDraft(true);
+  $('draftRestore').onclick=()=>{const d=readDraft();if(!d){showNotice('복구할 임시저장 내용이 없습니다.');return}if(confirm('현재 편집 중인 내용을 임시저장 내용으로 바꿀까요?'))restoreDraft(d)};
+  $('draftDelete').onclick=()=>{if(!readDraft()){showNotice('삭제할 임시저장 내용이 없습니다.');return}if(confirm('이 공략의 브라우저 임시저장만 삭제할까요?\n현재 편집 중인 내용과 게시된 공략은 삭제되지 않습니다.')){clearDraft();draftStatusText('임시저장 데이터를 삭제했습니다. 현재 편집 내용은 유지됩니다.')}};
+  ['input','change'].forEach(event=>{$('postTitle').addEventListener(event,queueDraft);$('postCat').addEventListener(event,queueDraft)});
+  ed.addEventListener('input',queueDraft);
+  $('postImage').addEventListener('change',queueDraft);
+  $('removeCover').addEventListener('click',queueDraft);
+  $('cancelCoverChange').addEventListener('click',queueDraft);
+  const flush=()=>saveDraft();activeDraftFlush=flush;
+  const onPageHide=()=>flush();window.addEventListener('pagehide',onPageHide);
+  const draftObserver=new MutationObserver(()=>{if(!$('postForm')?.isConnected||$('postForm')!==formNode){
+    if(activeDraftFlush===flush){flush();activeDraftFlush=null}
+    window.removeEventListener('pagehide',onPageHide);draftObserver.disconnect();
+  }});
+  const formNode=$('postForm');draftObserver.observe($('modalBody'),{childList:true});
   const toolbarRoot=$('postForm').querySelector('.rich-toolbar');
   const inside=r=>!!r&&ed.contains(r.commonAncestorContainer);
   function rememberSelection(){const sel=window.getSelection();if(sel&&sel.rangeCount&&inside(sel.getRangeAt(0)))selectedRange=sel.getRangeAt(0).cloneRange()}
@@ -175,8 +225,8 @@ function editor(p){
   syncToolbar();
  $('richLink').onclick=()=>{rememberSelection();const url=prompt('링크 주소를 입력하세요 (https://...)');if(!url)return;try{const u=new URL(url);if(!['https:','http:'].includes(u.protocol))throw Error();focusSelection();document.execCommand('createLink',false,u.href);rememberSelection()}catch{showNotice('http 또는 https 주소를 입력해 주세요.')}};
  $('richImage').onclick=()=>{rememberSelection();$('richImageFile').click()};
- $('richImageFile').onchange=async()=>{const file=$('richImageFile').files[0];if(!file)return;if(uploading)return;uploading=true;$('postSubmit').disabled=true;$('richStatus').textContent='이미지를 업로드하고 있습니다...';try{const url=await uploadGuideImage(file);focusSelection();const img=document.createElement('img');img.src=url;img.alt=file.name;img.style.maxWidth='100%';const sel=window.getSelection();if(sel&&sel.rangeCount&&ed.contains(sel.anchorNode)){const range=sel.getRangeAt(0);range.deleteContents();range.insertNode(img);range.setStartAfter(img);range.collapse(true);sel.removeAllRanges();sel.addRange(range)}else ed.appendChild(img);ed.appendChild(document.createElement('p'));$('richStatus').textContent='이미지가 본문에 삽입되었습니다.'}catch(err){showNotice(err.message);$('richStatus').textContent='이미지 업로드에 실패했습니다.'}finally{uploading=false;$('postSubmit').disabled=false;$('richImageFile').value=''}};
- $('postForm').onsubmit=async e=>{e.preventDefault();if(uploading)return;const title=$('postTitle').value.trim(),cat=$('postCat').value;const plain=ed.textContent.trim();if(!title||(!plain&&!ed.querySelector('img'))){showNotice('제목과 본문을 입력해 주세요.');return}let content;try{content=RICH_PREFIX+cleanRich(ed.innerHTML)}catch(err){showNotice(err.message);return}let image_url=coverRemoved?null:(p?.image_url||null);const submit=$('postSubmit');submit.disabled=true;submit.textContent='저장 중...';try{const file=$('postImage').files[0];if(file)image_url=await uploadGuideImage(file);const payload={title,content,category:cat,image_url};if(client){const response=p?await client.from('guides').update(payload).eq('id',p.id):await client.from('guides').insert(payload);if(response.error)throw response.error;await load()}else{if(p)Object.assign(p,payload);else posts.unshift({...payload,id:crypto.randomUUID()});saveDemo()}closeModal()}catch(err){showNotice(err.message)}finally{submit.disabled=false;submit.textContent='저장하기'}}
+ $('richImageFile').onchange=async()=>{const file=$('richImageFile').files[0];if(!file)return;if(uploading)return;uploading=true;$('postSubmit').disabled=true;$('richStatus').textContent='이미지를 업로드하고 있습니다...';try{const url=await uploadGuideImage(file);focusSelection();const img=document.createElement('img');img.src=url;img.alt=file.name;img.style.maxWidth='100%';const sel=window.getSelection();if(sel&&sel.rangeCount&&ed.contains(sel.anchorNode)){const range=sel.getRangeAt(0);range.deleteContents();range.insertNode(img);range.setStartAfter(img);range.collapse(true);sel.removeAllRanges();sel.addRange(range)}else ed.appendChild(img);ed.appendChild(document.createElement('p'));$('richStatus').textContent='이미지가 본문에 삽입되었습니다.';queueDraft()}catch(err){showNotice(err.message);$('richStatus').textContent='이미지 업로드에 실패했습니다.'}finally{uploading=false;$('postSubmit').disabled=false;$('richImageFile').value=''}};
+ $('postForm').onsubmit=async e=>{e.preventDefault();if(uploading)return;const title=$('postTitle').value.trim(),cat=$('postCat').value;const plain=ed.textContent.trim();if(!title||(!plain&&!ed.querySelector('img'))){showNotice('제목과 본문을 입력해 주세요.');return}let content;try{content=RICH_PREFIX+cleanRich(ed.innerHTML)}catch(err){showNotice(err.message);return}let image_url=coverRemoved?null:(p?.image_url||null);const submit=$('postSubmit');submit.disabled=true;submit.textContent='저장 중...';try{const file=$('postImage').files[0];if(file)image_url=await uploadGuideImage(file);const payload={title,content,category:cat,image_url};if(client){const response=p?await client.from('guides').update(payload).eq('id',p.id):await client.from('guides').insert(payload);if(response.error)throw response.error;clearDraft();draftEnabled=false;if(activeDraftFlush===flush)activeDraftFlush=null;await load()}else{if(p)Object.assign(p,payload);else posts.unshift({...payload,id:crypto.randomUUID()});saveDemo();clearDraft();draftEnabled=false;if(activeDraftFlush===flush)activeDraftFlush=null}closeModal()}catch(err){showNotice(err.message)}finally{submit.disabled=false;submit.textContent='저장하기'}}
 }
 async function uploadGuideImage(file){if(!client)throw Error('이미지 업로드는 Supabase 연결 후 사용할 수 있습니다.');if(!['image/png','image/jpeg','image/webp','image/gif'].includes(file.type))throw Error('JPG, PNG, WEBP, GIF 이미지만 업로드할 수 있습니다.');if(file.size>5*1024*1024)throw Error('이미지는 5MB 이하로 등록해 주세요.');const path=`${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;const {error}=await client.storage.from('guide-images').upload(path,file,{upsert:false,contentType:file.type});if(error)throw error;return client.storage.from('guide-images').getPublicUrl(path).data.publicUrl}
 function saveDemo(){localStorage.setItem('guide-demo-posts',JSON.stringify(posts));render()}
