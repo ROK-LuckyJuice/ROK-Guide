@@ -326,8 +326,8 @@ function adminPanel(){
  if(!client){openModal('관리자 안내','<p class="notice">데이터 서비스에 연결되지 않았습니다.</p>');return}
  if(!currentUser){accountPanel();return}
  if(!admin){openModal('관리자 권한 없음','<p class="notice">로그인은 완료되었지만 관리자 권한이 없는 계정입니다.</p><p class="small">관리자 권한은 Supabase guide_admins 테이블에서 별도로 지정합니다.</p>');return}
- openModal('관리자 페이지',`<p>등록된 공략: ${posts.length}개</p><div class="actions"><button class="btn" id="newPost">새 공략 등록</button><button class="ghost" id="manageGuides">📋 공략 관리 목록</button><button class="ghost" id="editSiteBrand">✏️ 사이트 이름 변경</button><button class="ghost" id="logout">로그아웃</button></div><p class="small">기존 공략은 목록에서 자세히 보기 → 수정/삭제로 관리할 수 있습니다.</p>`);
- $('newPost').onclick=()=>editor();$('manageGuides').onclick=adminGuideList;$('editSiteBrand').onclick=editSiteBrand;
+ openModal('관리자 페이지',`<p>등록된 공략: ${posts.length}개</p><div class="actions"><button class="btn" id="newPost">새 공략 등록</button><button class="ghost" id="manageGuides">📋 공략 관리 목록</button><button class="ghost" id="editSiteBrand">✏️ 사이트 이름 변경</button><button class="ghost" id="manageCouponRequests">🗑️ 쿠폰 삭제 요청 관리</button><button class="ghost" id="logout">로그아웃</button></div><p class="small">기존 공략은 목록에서 자세히 보기 → 수정/삭제로 관리할 수 있습니다.</p>`);
+ $('newPost').onclick=()=>editor();$('manageGuides').onclick=adminGuideList;$('editSiteBrand').onclick=editSiteBrand;$('manageCouponRequests').onclick=manageCouponRequests;
  $('logout').onclick=async()=>{const {error}=await client.auth.signOut();if(error)return showNotice(error.message);closeModal()};
 }
 $('adminBtn').onclick=adminPanel;$('couponBtn').onclick=couponPanel;
@@ -356,7 +356,13 @@ async function refreshCoupons(){
   else used=new Set(getLocalCouponUses());
   if(!target.isConnected)return;
   const coupons=data||[];
-  target.innerHTML=coupons.length?coupons.map(c=>`<div class="panel" style="margin:10px 0;padding:15px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><strong style="color:var(--gold);overflow-wrap:anywhere">${esc(c.code)}</strong><span class="small">${used.has(c.id)?'✅ 사용완료':'🎟️ 사용 전'}</span></div>${c.description?`<p class="small" style="overflow-wrap:anywhere">${esc(c.description)}</p>`:''}<div class="actions" style="margin-top:10px"><button class="ghost" type="button" data-copy-coupon="${esc(c.id)}">📋 복사</button><button class="${used.has(c.id)?'ghost':'btn'}" type="button" data-use-coupon="${esc(c.id)}">${used.has(c.id)?'사용완료 취소':'사용완료'}</button></div></div>`).join(''):'<p class="notice">아직 등록된 쿠폰이 없습니다. 첫 쿠폰을 등록해 보세요!</p>';
+  target.innerHTML=coupons.length?coupons.map(c=>`<div class="panel" style="margin:10px 0;padding:15px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><strong style="color:var(--gold);overflow-wrap:anywhere">${esc(c.code)}</strong><span class="small">${used.has(c.id)?'✅ 사용완료':'🎟️ 사용 전'}</span></div>${c.description?`<p class="small" style="overflow-wrap:anywhere">${esc(c.description)}</p>`:''}<div class="actions" style="margin-top:10px"><button class="ghost" type="button" data-copy-coupon="${esc(c.id)}">📋 복사</button><button class="${used.has(c.id)?'ghost':'btn'}" type="button" data-use-coupon="${esc(c.id)}">${used.has(c.id)?'사용완료 취소':'사용완료'}</button><button class="ghost" type="button" data-request-delete="${esc(c.id)}">📝 삭제 요청</button>${admin?`<button class="ghost" type="button" data-admin-delete-coupon="${esc(c.id)}">🗑️ 관리자 삭제</button>`:''}</div></div>`).join(''):'<p class="notice">아직 등록된 쿠폰이 없습니다. 첫 쿠폰을 등록해 보세요!</p>';
+  target.querySelectorAll('[data-request-delete]').forEach(btn=>btn.onclick=()=>{
+    const c=coupons.find(x=>String(x.id)===btn.dataset.requestDelete);if(c)requestCouponDeletion(c);
+  });
+  target.querySelectorAll('[data-admin-delete-coupon]').forEach(btn=>btn.onclick=async()=>{
+    if(!admin)return;const c=coupons.find(x=>String(x.id)===btn.dataset.adminDeleteCoupon);if(c)await adminDeleteCoupon(c);
+  });
   target.querySelectorAll('[data-copy-coupon]').forEach(btn=>btn.onclick=async()=>{const c=coupons.find(x=>String(x.id)===btn.dataset.copyCoupon);if(!c)return;try{await navigator.clipboard.writeText(c.code);showNotice('쿠폰코드를 복사했습니다.')}catch{prompt('쿠폰코드를 복사해 주세요.',c.code)}});
   target.querySelectorAll('[data-use-coupon]').forEach(btn=>btn.onclick=async()=>{
    const id=btn.dataset.useCoupon,wasUsed=used.has(id);btn.disabled=true;
@@ -367,6 +373,44 @@ async function refreshCoupons(){
    }catch(err){showNotice('사용완료 상태 저장 실패: '+err.message);btn.disabled=false}
   });
  }catch(err){if(target.isConnected)target.innerHTML=`<p class="notice">쿠폰 목록을 불러오지 못했습니다: ${esc(err.message)}</p>`}
+}
+function requestCouponDeletion(c){
+ openModal('📝 쿠폰 삭제 요청',`<p class="notice">쿠폰: <strong>${esc(c.code)}</strong></p><p class="small">요청이 접수되어도 즉시 삭제되지 않습니다. 관리자가 검토합니다.</p><form id="couponDeleteRequestForm"><div class="field"><label for="couponDeleteReason">삭제 요청 사유</label><select id="couponDeleteReasonType"><option value="잘못된 쿠폰번호">잘못된 쿠폰번호</option><option value="만료된 쿠폰">만료된 쿠폰</option><option value="잘못된 정보">잘못된 정보</option><option value="기타">기타</option></select><textarea id="couponDeleteReason" maxlength="250" style="min-height:90px" placeholder="상세 사유 (선택)"></textarea></div><div class="actions"><button class="btn" type="submit" id="couponRequestSubmit">삭제 요청 보내기</button><button class="ghost" type="button" id="couponRequestBack">쿠폰 목록으로</button></div></form>`);
+ $('couponRequestBack').onclick=couponPanel;
+ $('couponDeleteRequestForm').onsubmit=async e=>{e.preventDefault();const btn=$('couponRequestSubmit');btn.disabled=true;
+  const reason=($('couponDeleteReasonType').value+' '+$('couponDeleteReason').value.trim()).trim();
+  try{const {error}=await client.from('coupon_delete_requests').insert({coupon_id:c.id,reason});if(error)throw error;showNotice('삭제 요청이 접수되었습니다. 관리자가 확인한 후 처리합니다.');await couponPanel()}
+  catch(err){showNotice('삭제 요청 실패: '+err.message);if(btn.isConnected)btn.disabled=false}
+ };
+}
+async function adminDeleteCoupon(c){
+ if(!admin||!confirm(`쿠폰 「${c.code}」을(를) 정말 삭제할까요?\n회원들의 해당 쿠폰 사용 기록과 삭제 요청도 함께 삭제됩니다.`))return;
+ try{const {data,error}=await client.from('coupons').delete().eq('id',c.id).select('id');if(error)throw error;if(!data?.length)throw Error('삭제 권한이 없거나 이미 삭제된 쿠폰입니다.');showNotice('쿠폰이 삭제되었습니다.');await couponPanel()}
+ catch(err){showNotice('쿠폰 삭제 실패: '+err.message)}
+}
+async function manageCouponRequests(){
+ if(!admin||!client)return;
+ openModal('🗑️ 쿠폰 삭제 요청 관리','<p class="small">삭제 요청을 불러오는 중...</p>');
+ try{
+  const [r,c]=await Promise.all([client.from('coupon_delete_requests').select('id,coupon_id,reason,status,created_at').order('created_at',{ascending:false}),client.from('coupons').select('id,code')]);
+  if(r.error)throw r.error;if(c.error)throw c.error;
+  const codes=new Map((c.data||[]).map(x=>[x.id,x.code]));const requests=r.data||[];
+  $('modalBody').innerHTML=`<p class="small">요청 총 ${requests.length}건 · 승인 시 쿠폰과 관련 사용완료 기록이 삭제됩니다.</p><div id="deleteRequestList"></div><div class="actions" style="margin-top:14px"><button class="ghost" id="deleteRequestBack">← 관리자 페이지</button></div>`;
+  $('deleteRequestBack').onclick=adminPanel;
+  $('deleteRequestList').innerHTML=requests.length?requests.map(x=>`<div class="panel" style="margin:10px 0"><strong>${esc(codes.get(x.coupon_id)||'삭제된 쿠폰')}</strong><p class="small">${esc(x.reason)} · ${esc(new Date(x.created_at).toLocaleString('ko-KR'))}</p><p class="small">${x.status==='pending'?'⏳ 검토 대기':'↩️ 반려됨'}</p>${x.status==='pending'?`<div class="actions"><button class="btn" data-approve-request="${esc(x.id)}">삭제 승인</button><button class="ghost" data-reject-request="${esc(x.id)}">반려</button></div>`:''}</div>`).join(''):'<p class="notice">접수된 삭제 요청이 없습니다.</p>';
+  $('deleteRequestList').querySelectorAll('[data-approve-request]').forEach(b=>b.onclick=async()=>{
+   const req=requests.find(x=>x.id===b.dataset.approveRequest);if(!req)return;
+   if(!confirm('이 요청을 승인하고 해당 쿠폰을 영구 삭제할까요?'))return;
+   b.disabled=true;
+   try{const {data,error}=await client.from('coupons').delete().eq('id',req.coupon_id).select('id');if(error)throw error;if(!data?.length)throw Error('쿠폰이 이미 삭제되었거나 삭제 권한이 없습니다.');showNotice('삭제 요청을 승인하고 쿠폰을 삭제했습니다.');await manageCouponRequests()}
+   catch(err){showNotice('삭제 승인 실패: '+err.message);if(b.isConnected)b.disabled=false}
+  });
+  $('deleteRequestList').querySelectorAll('[data-reject-request]').forEach(b=>b.onclick=async()=>{
+   if(!confirm('이 삭제 요청을 반려할까요?'))return;b.disabled=true;
+   try{const {error}=await client.from('coupon_delete_requests').update({status:'rejected'}).eq('id',b.dataset.rejectRequest);if(error)throw error;showNotice('요청을 반려했습니다.');await manageCouponRequests()}
+   catch(err){showNotice('반려 처리 실패: '+err.message);if(b.isConnected)b.disabled=false}
+  });
+ }catch(err){$('modalBody').innerHTML=`<p class="notice">요청 목록을 불러오지 못했습니다: ${esc(err.message)}</p>`}
 }
 function search(){query=$('search').value.trim().toLowerCase();if(category==='계산기')category='';render()}$('searchBtn').onclick=search;$('search').onkeydown=e=>{if(e.key==='Enter')search()};for(const id of ['power','percent','unit','times'])$(id).oninput=calc;function calc(){const power=Number($('power').value)||0,percent=Number($('percent').value)||0,unit=Number($('unit').value)||0,times=Number($('times').value)||0;$('powerResult').textContent=Math.round(power*(1+percent/100)).toLocaleString('ko-KR');$('resourceResult').textContent=(unit*times).toLocaleString('ko-KR')}calc();init();
 </script></body></html>
