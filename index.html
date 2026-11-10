@@ -330,5 +330,43 @@ function adminPanel(){
  $('newPost').onclick=()=>editor();$('manageGuides').onclick=adminGuideList;$('editSiteBrand').onclick=editSiteBrand;
  $('logout').onclick=async()=>{const {error}=await client.auth.signOut();if(error)return showNotice(error.message);closeModal()};
 }
-$('adminBtn').onclick=adminPanel;$('couponBtn').onclick=()=>openModal('🎁 쿠폰코드','<p>쿠폰코드 게시판은 관리자 기능에서 추후 확장할 수 있습니다.</p>');function search(){query=$('search').value.trim().toLowerCase();if(category==='계산기')category='';render()}$('searchBtn').onclick=search;$('search').onkeydown=e=>{if(e.key==='Enter')search()};for(const id of ['power','percent','unit','times'])$(id).oninput=calc;function calc(){const power=Number($('power').value)||0,percent=Number($('percent').value)||0,unit=Number($('unit').value)||0,times=Number($('times').value)||0;$('powerResult').textContent=Math.round(power*(1+percent/100)).toLocaleString('ko-KR');$('resourceResult').textContent=(unit*times).toLocaleString('ko-KR')}calc();init();
+$('adminBtn').onclick=adminPanel;$('couponBtn').onclick=couponPanel;
+const COUPON_LOCAL_KEY='rok-guide-coupon-used-v1';
+function getLocalCouponUses(){try{return JSON.parse(localStorage.getItem(COUPON_LOCAL_KEY)||'[]')}catch{return []}}
+function saveLocalCouponUses(values){try{localStorage.setItem(COUPON_LOCAL_KEY,JSON.stringify(values))}catch(e){showNotice('이 브라우저에 사용완료 상태를 저장할 수 없습니다.')}}
+async function couponPanel(){
+ if(!client){showNotice('쿠폰 서비스에 연결되지 않았습니다.');return}
+ openModal('🎁 쿠폰코드',`<p class="small">누구나 쿠폰을 등록하고 복사할 수 있습니다. 사용완료 상태는 ${currentUser?'로그인 계정에 저장되어 다른 기기에서도 유지됩니다.':'현재 브라우저에 저장됩니다. 다른 기기와 동기화하려면 로그인해 주세요.'}</p><form id="couponForm"><div class="field"><label for="couponCode">쿠폰코드</label><input id="couponCode" maxlength="100" required autocomplete="off" placeholder="쿠폰코드 입력"></div><div class="field"><label for="couponDescription">설명 (선택)</label><input id="couponDescription" maxlength="300" placeholder="쿠폰 정보"></div><button class="btn" type="submit" id="couponSubmit">쿠폰 등록</button></form><hr style="border:0;border-top:1px solid #40536a;margin:20px 0"><div class="section"><h3 style="margin:0">등록된 쿠폰</h3><button class="ghost" type="button" id="couponRefresh">새로고침</button></div><div id="couponList" aria-live="polite"><p class="small">쿠폰을 불러오는 중...</p></div>`);
+ $('couponRefresh').onclick=refreshCoupons;
+ $('couponForm').onsubmit=async e=>{
+  e.preventDefault();const code=$('couponCode').value.trim(),description=$('couponDescription').value.trim();
+  if(!code||code.length>100||description.length>300){showNotice('쿠폰코드는 1~100자, 설명은 300자 이하로 입력해 주세요.');return}
+  const btn=$('couponSubmit');btn.disabled=true;
+  try{const {error}=await client.from('coupons').insert({code,description});if(error){if(error.code==='23505')throw Error('이미 등록된 쿠폰코드입니다.');throw error}$('couponCode').value='';$('couponDescription').value='';await refreshCoupons();showNotice('쿠폰이 등록되었습니다.')}
+  catch(err){showNotice('쿠폰 등록 실패: '+err.message)}finally{if(btn.isConnected)btn.disabled=false}
+ };
+ await refreshCoupons();
+}
+async function refreshCoupons(){
+ const target=$('couponList');if(!target)return;target.innerHTML='<p class="small">쿠폰을 불러오는 중...</p>';
+ try{
+  const {data,error}=await client.from('coupons').select('id,code,description,created_at').order('created_at',{ascending:false});if(error)throw error;
+  let used=new Set();const userId=currentUser?.id||null;
+  if(userId){const result=await client.from('coupon_usages').select('coupon_id').eq('user_id',userId);if(result.error)throw result.error;used=new Set((result.data||[]).map(x=>x.coupon_id))}
+  else used=new Set(getLocalCouponUses());
+  if(!target.isConnected)return;
+  const coupons=data||[];
+  target.innerHTML=coupons.length?coupons.map(c=>`<div class="panel" style="margin:10px 0;padding:15px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><strong style="color:var(--gold);overflow-wrap:anywhere">${esc(c.code)}</strong><span class="small">${used.has(c.id)?'✅ 사용완료':'🎟️ 사용 전'}</span></div>${c.description?`<p class="small" style="overflow-wrap:anywhere">${esc(c.description)}</p>`:''}<div class="actions" style="margin-top:10px"><button class="ghost" type="button" data-copy-coupon="${esc(c.id)}">📋 복사</button><button class="${used.has(c.id)?'ghost':'btn'}" type="button" data-use-coupon="${esc(c.id)}">${used.has(c.id)?'사용완료 취소':'사용완료'}</button></div></div>`).join(''):'<p class="notice">아직 등록된 쿠폰이 없습니다. 첫 쿠폰을 등록해 보세요!</p>';
+  target.querySelectorAll('[data-copy-coupon]').forEach(btn=>btn.onclick=async()=>{const c=coupons.find(x=>String(x.id)===btn.dataset.copyCoupon);if(!c)return;try{await navigator.clipboard.writeText(c.code);showNotice('쿠폰코드를 복사했습니다.')}catch{prompt('쿠폰코드를 복사해 주세요.',c.code)}});
+  target.querySelectorAll('[data-use-coupon]').forEach(btn=>btn.onclick=async()=>{
+   const id=btn.dataset.useCoupon,wasUsed=used.has(id);btn.disabled=true;
+   try{
+    if(userId){const q=client.from('coupon_usages');const result=wasUsed?await q.delete().eq('user_id',userId).eq('coupon_id',id):await q.insert({user_id:userId,coupon_id:id});if(result.error)throw result.error}
+    else{const values=new Set(getLocalCouponUses());if(wasUsed)values.delete(id);else values.add(id);saveLocalCouponUses([...values])}
+    await refreshCoupons();
+   }catch(err){showNotice('사용완료 상태 저장 실패: '+err.message);btn.disabled=false}
+  });
+ }catch(err){if(target.isConnected)target.innerHTML=`<p class="notice">쿠폰 목록을 불러오지 못했습니다: ${esc(err.message)}</p>`}
+}
+function search(){query=$('search').value.trim().toLowerCase();if(category==='계산기')category='';render()}$('searchBtn').onclick=search;$('search').onkeydown=e=>{if(e.key==='Enter')search()};for(const id of ['power','percent','unit','times'])$(id).oninput=calc;function calc(){const power=Number($('power').value)||0,percent=Number($('percent').value)||0,unit=Number($('unit').value)||0,times=Number($('times').value)||0;$('powerResult').textContent=Math.round(power*(1+percent/100)).toLocaleString('ko-KR');$('resourceResult').textContent=(unit*times).toLocaleString('ko-KR')}calc();init();
 </script></body></html>
