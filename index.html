@@ -242,7 +242,38 @@ body{background:radial-gradient(ellipse at top,#493022 0%,#1a100d 62%,#100b09 10
     grid-auto-flow:column!important;
   }
 }
-</style><script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js" defer></script></head><body><div class="wrap"><header class="top"><div class="brand" id="brand">#252 CROW | 달콩쓰</div><div class="actions"><button class="ghost" id="couponBtn">🎁 쿠폰코드</button><button class="ghost" id="accountBtn">👤 로그인 / 회원가입</button><button class="ghost" id="adminBtn">⚙️ 관리자</button></div></header><section class="hero"><div class="small">LAST ASYLUM GUIDE</div><h1>게임 공략</h1><p class="small">초보자부터 숙련자까지, 필요한 공략을 한곳에서</p><div class="search"><input id="search" placeholder="🔍 공략을 검색하세요" aria-label="공략 검색"><button class="btn" id="searchBtn">확인</button></div></section><div class="book-layout"><aside class="book-left"><h2 class="book-label">⚜ 공략 카테고리</h2><nav class="cats" id="cats"></nav></aside><main class="book-center"><section id="postsSection"><div class="section"><h2 id="sectionTitle">전체 공략</h2><span class="small" id="count"></span></div><div class="cards" id="cards"></div></section></main><aside class="book-right"><div class="side-paper"><h2>🔎 공략 검색</h2><div id="sideSearchMount"></div></div><div class="side-paper"><h2>✒ 최근 등록된 공략</h2><div id="recentGuides" class="recent-guides"></div></div><button class="coupon-side" id="couponSideBtn" type="button">🎟 최신 쿠폰 정보 <small>사용 가능한 쿠폰 확인하기 ❯</small></button></aside></div><footer class="footer">팬 제작 공략 사이트 · 원작 게임과 공식 제휴 관계가 없습니다.<p><a href="./privacy.html" style="color:#e7c278">개인정보처리방침</a></p></footer></div>
+
+/* Notice board and compact account indicator */
+#accountBtn{white-space:nowrap;min-width:48px}
+.notice-board{margin:14px 0 0;border:2px ridge #a67a40;background:linear-gradient(135deg,#e9d5a9,#d6b782);color:#392515;border-radius:9px;padding:12px 16px;box-shadow:0 5px 14px #0007;font-family:Georgia,'Malgun Gothic',serif}
+.notice-board summary{cursor:pointer;font-weight:800;font-size:17px;list-style:none;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.notice-board summary::-webkit-details-marker{display:none}
+.notice-board summary::after{content:'⌄';font-size:20px}
+.notice-board[open] summary::after{content:'⌃'}
+.notice-board .notice-list{margin-top:10px;display:grid;gap:9px}
+.notice-board .notice-entry{border-top:1px solid #a88454;padding:10px 2px 2px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65}
+.notice-board .notice-entry strong{display:block;color:#432713;margin-bottom:4px}
+.notice-board .notice-entry time{font-size:12px;color:#6e5131}
+.notice-board .notice-empty{color:#60452c;font-size:14px}
+.notice-admin-list{display:grid;gap:10px;margin:15px 0}.notice-admin-item{padding:12px;border:1px solid #947247;border-radius:8px;overflow-wrap:anywhere}
+.notice-admin-item p{white-space:pre-wrap;line-height:1.6}
+
+/* 방문 시 공지 팝업: 기존 공지사항 및 관리자 기능과 독립 */
+.site-notice-overlay{position:fixed;inset:0;z-index:10050;background:#080603b8;display:flex;align-items:center;justify-content:center;padding:18px}
+.site-notice-popup{width:min(570px,100%);max-height:min(82vh,760px);display:flex;flex-direction:column;background:linear-gradient(145deg,#f5e6c1,#dfc18a);color:#3b2616;border:4px ridge #a47637;border-radius:12px;box-shadow:0 20px 65px #000b;overflow:hidden}
+.site-notice-head{padding:16px 20px 12px;border-bottom:2px solid #ac834d;font-size:22px;font-weight:900}
+.site-notice-body{overflow:auto;padding:14px 20px;min-height:80px}
+.site-notice-item{padding:12px 0;border-bottom:1px solid #b99b70}
+.site-notice-item:last-child{border-bottom:0}
+.site-notice-item strong{display:block;font-size:17px;overflow-wrap:anywhere}
+.site-notice-item time{display:block;color:#735535;font-size:12px;margin:4px 0 8px}
+.site-notice-item div{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65}
+.site-notice-foot{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px;padding:12px 17px;border-top:2px solid #ac834d}
+.site-notice-foot label{display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+.site-notice-foot input{width:18px;height:18px;accent-color:#75461f}
+.site-notice-close{padding:9px 17px;background:#522517;color:#fff1cc;border:1px solid #bd8e49;border-radius:5px;font-weight:700}
+@media(max-width:480px){.site-notice-head{font-size:19px}.site-notice-foot{justify-content:space-between}.site-notice-body{padding:10px 15px}}
+</style><script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js" defer></script></head><body><div class="wrap"><header class="top"><div class="brand" id="brand">#252 CROW | 달콩쓰</div><div class="actions"><button class="ghost" id="couponBtn">🎁 쿠폰코드</button><button class="ghost" id="accountBtn">👤 로그인 / 회원가입</button><button class="ghost" id="adminBtn">⚙️ 관리자</button></div></header><details class="notice-board" id="noticeBoard"><summary>📢 공지사항 <span id="noticeCount" style="font-size:13px;font-weight:normal">불러오는 중</span></summary><div class="notice-list" id="noticeList"><div class="notice-empty">공지를 불러오는 중입니다.</div></div></details><div id="siteNoticeOverlay" class="site-notice-overlay" role="dialog" aria-modal="true" aria-labelledby="siteNoticeHeading" hidden style="display:none"><div class="site-notice-popup"><div class="site-notice-head" id="siteNoticeHeading">📢 공지사항</div><div id="siteNoticePopupBody" class="site-notice-body"></div><div class="site-notice-foot"><label><input type="checkbox" id="siteNoticeSkipDay"> 하루 동안 보지 않기</label><button type="button" class="site-notice-close" id="siteNoticeClose">닫기 ✕</button></div></div></div><section class="hero"><div class="small">LAST ASYLUM GUIDE</div><h1>게임 공략</h1><p class="small">초보자부터 숙련자까지, 필요한 공략을 한곳에서</p><div class="search"><input id="search" placeholder="🔍 공략을 검색하세요" aria-label="공략 검색"><button class="btn" id="searchBtn">확인</button></div></section><div class="book-layout"><aside class="book-left"><h2 class="book-label">⚜ 공략 카테고리</h2><nav class="cats" id="cats"></nav></aside><main class="book-center"><section id="postsSection"><div class="section"><h2 id="sectionTitle">전체 공략</h2><span class="small" id="count"></span></div><div class="cards" id="cards"></div></section></main><aside class="book-right"><div class="side-paper"><h2>🔎 공략 검색</h2><div id="sideSearchMount"></div></div><div class="side-paper"><h2>✒ 최근 등록된 공략</h2><div id="recentGuides" class="recent-guides"></div></div><button class="coupon-side" id="couponSideBtn" type="button">🎟 최신 쿠폰 정보 <small>사용 가능한 쿠폰 확인하기 ❯</small></button></aside></div><footer class="footer">팬 제작 공략 사이트 · 원작 게임과 공식 제휴 관계가 없습니다.<p><a href="./privacy.html" style="color:#e7c278">개인정보처리방침</a></p></footer></div>
 <div class="modal" id="modal"><div class="dialog"><div class="section"><h2 id="modalTitle">안내</h2><button class="ghost" id="closeModal">닫기 ✕</button></div><div id="modalBody"></div></div></div>
 <script>
 const DEFAULT_CATS=[['beginner','초보자 가이드','🌱'],['heroes','영웅','👑'],['guild','길드전','⚔️'],['warrior','전사','🛡️'],['ranger','레인저','🏹'],['other','기타 공략','📖'],['mage','마법사','🔮']];let hiddenCategoryItems=[];let categoryItems=DEFAULT_CATS.map(([id,name,emoji],i)=>({id,name,emoji,image_url:null,sort_order:i,is_calculator:id==='calculator'}));let CATS=categoryItems.map(c=>[c.name,c.emoji]);function syncCats(){CATS=categoryItems.map(c=>[c.name,c.emoji]);}function calcCatName(){return categoryItems.find(c=>c.is_calculator)?.name||'계산기'}function isCalcCat(name){return name===calcCatName()}function catByName(name){return categoryItems.find(c=>c.name===name)}function categoryIcon(c){return c?.image_url&&/^https:\/\//i.test(c.image_url)?`<img src="${esc(c.image_url)}" alt="" loading="lazy" style="width:42px;height:42px;object-fit:contain">`:esc(c?.emoji||'📖')}const $=id=>document.getElementById(id);let category='',query='',posts=[],admin=false,client=null,currentUser=null;const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -255,11 +286,11 @@ const CONFIG={
   url:'https://ncfgwsgwohligwwlemcw.supabase.co',
   anonKey:'sb_publishable_65uGXHJw36zlPK0ovhPUOA_trFLWh3j'
 };
-async function init(){if(CONFIG.url&&CONFIG.anonKey){try{const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2');client=createClient(CONFIG.url,CONFIG.anonKey);await loadCategories();await load();await loadSiteBrand();const {data}=await client.auth.getSession();await updateIdentity(data.session);client.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>updateIdentity(session),0)})}catch(e){console.error(e);showNotice('데이터 연결에 실패했습니다. 설정을 확인해 주세요.')}}else{posts=JSON.parse(localStorage.getItem('guide-demo-posts')||'[]');}render()}
+async function init(){if(CONFIG.url&&CONFIG.anonKey){try{const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2');client=createClient(CONFIG.url,CONFIG.anonKey);await loadCategories();await load();await loadSiteBrand();await loadNotices();const {data}=await client.auth.getSession();await updateIdentity(data.session);client.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>updateIdentity(session),0)})}catch(e){console.error(e);showNotice('데이터 연결에 실패했습니다. 설정을 확인해 주세요.')}}else{posts=JSON.parse(localStorage.getItem('guide-demo-posts')||'[]');}render()}
 async function updateIdentity(session){
  currentUser=session?.user||null;admin=false;
  if(client&&currentUser){try{const {data,error}=await client.from('guide_admins').select('user_id').eq('user_id',currentUser.id).maybeSingle();if(error)console.warn('관리자 권한 확인:',error.message);else admin=!!data}catch(e){console.warn('관리자 권한 확인 실패:',e)}}
- const account=$('accountBtn');if(account)account.textContent=currentUser?'👤 '+(currentUser.email||'내 계정'):'👤 로그인 / 회원가입';
+ accountEmailVisible=false;const account=$('accountBtn');if(account){account.textContent=currentUser?'👤':'👤 로그인 / 회원가입';account.title=currentUser?'계정 정보 보기':'로그인 / 회원가입';account.setAttribute('aria-label',currentUser?'계정 정보 보기':'로그인 / 회원가입');}
  render();
 }
 function accountPanel(){
@@ -271,7 +302,8 @@ function accountPanel(){
  $('accountForm').onsubmit=async e=>{e.preventDefault();const btn=$('emailLogin');btn.disabled=true;try{const {error}=await client.auth.signInWithPassword(credentials());if(error)throw error;closeModal()}catch(e){showNotice('로그인 실패: '+e.message)}finally{btn.disabled=false}};
  $('emailSignup').onclick=async()=>{const {email,password}=credentials();if(!email||password.length<6){showNotice('이메일과 6자 이상 비밀번호를 입력해 주세요.');return}const btn=$('emailSignup');btn.disabled=true;try{const {data,error}=await client.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});if(error)throw error;if(data.session){showNotice('회원가입 및 로그인 완료!');closeModal()}else{openModal('📩 이메일 인증이 필요합니다',`<div class="notice" style="line-height:1.9;padding:18px"><strong style="color:var(--gold);font-size:18px">회원가입 신청이 완료되었습니다.</strong><p>입력하신 이메일 주소 <strong>${esc(email)}</strong>로 인증 메일이 발송되었는지 확인해 주세요.</p><p><strong>1.</strong> 이메일 받은편지함 확인<br><strong>2.</strong> 인증 메일의 링크 클릭<br><strong>3.</strong> 인증 완료 후 이메일 로그인</p><p class="small">메일이 보이지 않으면 스팸메일함도 확인해 주세요. 인증이 완료되기 전에는 로그인이 제한될 수 있습니다.</p></div><div class="actions" style="margin-top:16px"><button type="button" class="btn" id="backToMemberLogin">로그인 화면으로 돌아가기</button></div>`);$('backToMemberLogin').onclick=accountPanel}}catch(e){showNotice('회원가입 실패: '+e.message)}finally{btn.disabled=false}};
 }
-$('accountBtn').onclick=accountPanel;
+let accountEmailVisible=false;
+$('accountBtn').onclick=()=>{if(!currentUser){accountPanel();return}accountEmailVisible=!accountEmailVisible;const b=$('accountBtn');b.textContent=accountEmailVisible?'👤 '+(currentUser.email||'내 계정'):'👤';b.setAttribute('aria-expanded',String(accountEmailVisible));};
 const DEFAULT_SITE_BRAND='#252 CROW | 달콩쓰';
 async function loadSiteBrand(){
   if(!client)return;
@@ -586,12 +618,58 @@ function manageCategories(){
  redraw();
 }
 
+
+/* Public notice board; only guide_admins members can write (enforced by Supabase RLS). */
+let siteNotices=[];
+/* 공지 팝업: 체크 후 닫기 시 이 브라우저에서 24시간 숨김 */
+const NOTICE_SKIP_KEY='rok-guide-notice-hidden-until';
+let siteNoticePopupShown=false;
+function closeSiteNoticePopup(){
+ const overlay=$('siteNoticeOverlay');if(!overlay)return;
+ if($('siteNoticeSkipDay')?.checked){try{localStorage.setItem(NOTICE_SKIP_KEY,String(Date.now()+24*60*60*1000))}catch(e){console.warn('공지 숨김 저장 불가',e)}}
+ overlay.hidden=true;overlay.style.display='none';document.body.style.overflow='';
+}
+function maybeShowSiteNoticePopup(){
+ if(siteNoticePopupShown||!siteNotices.length)return;
+ let hiddenUntil=0;try{hiddenUntil=Number(localStorage.getItem(NOTICE_SKIP_KEY)||0)}catch(e){}
+ if(Date.now()<hiddenUntil)return;
+ const overlay=$('siteNoticeOverlay'),body=$('siteNoticePopupBody');if(!overlay||!body)return;
+ body.innerHTML=siteNotices.map(n=>`<article class="site-notice-item"><strong>${esc(n.title)}</strong><time>${esc((n.created_at||'').slice(0,10))}</time><div>${esc(n.content)}</div></article>`).join('');
+ siteNoticePopupShown=true;overlay.hidden=false;overlay.style.display='flex';document.body.style.overflow='hidden';
+ $('siteNoticeSkipDay').checked=false;
+ $('siteNoticeClose').focus();
+}
+$('siteNoticeClose').addEventListener('click',closeSiteNoticePopup);
+$('siteNoticeOverlay').addEventListener('click',e=>{if(e.target===$('siteNoticeOverlay'))closeSiteNoticePopup()});
+async function loadNotices(){
+ if(!client)return;
+ const {data,error}=await client.from('guide_notices').select('id,title,content,created_at,updated_at').order('created_at',{ascending:false}).limit(100);
+ const list=$('noticeList'), count=$('noticeCount');
+ if(error){console.warn('공지사항:',error.message);if(list)list.innerHTML='<div class="notice-empty">공지사항을 불러올 수 없습니다. 관리자에게 문의해 주세요.</div>';if(count)count.textContent='';return}
+ siteNotices=data||[];
+ if(count)count.textContent=siteNotices.length+'건';
+ if(list)list.innerHTML=siteNotices.length?siteNotices.map(n=>`<article class="notice-entry"><strong>${esc(n.title)}</strong><time>${esc((n.created_at||'').slice(0,10))}</time><div>${esc(n.content)}</div></article>`).join(''):'<div class="notice-empty">등록된 공지사항이 없습니다.</div>';
+ maybeShowSiteNoticePopup();
+}
+async function manageNotices(){
+ if(!admin||!currentUser)return showNotice('관리자 권한이 필요합니다.');
+ await loadNotices();
+ openModal('📢 공지사항 관리',`<p class="small">공지사항은 홈페이지 상단에 표시됩니다. 관리자만 등록·수정·삭제할 수 있습니다.</p><form id="noticeEditorForm"><input type="hidden" id="noticeEditId"><div class="field"><label for="noticeTitle">제목</label><input id="noticeTitle" maxlength="120" required placeholder="공지 제목"></div><div class="field"><label for="noticeContent">내용</label><textarea id="noticeContent" maxlength="10000" required placeholder="공지 내용을 입력하세요"></textarea></div><div class="actions"><button class="btn" type="submit" id="noticeSave">공지 등록</button><button class="ghost" type="button" id="noticeReset">새 공지 작성</button></div></form><div class="notice-admin-list" id="noticeAdminList"></div><div class="actions"><button class="ghost" id="noticeBack">← 관리자 페이지</button></div>`);
+ const redraw=()=>{$('noticeAdminList').innerHTML=siteNotices.length?siteNotices.map(n=>`<div class="notice-admin-item"><strong>${esc(n.title)}</strong><p>${esc(n.content)}</p><div class="actions"><button class="ghost" data-edit-notice="${esc(n.id)}">수정</button><button class="ghost" data-delete-notice="${esc(n.id)}">삭제</button></div></div>`).join(''):'<p class="small">등록된 공지사항이 없습니다.</p>';
+ $('noticeAdminList').querySelectorAll('[data-edit-notice]').forEach(b=>b.onclick=()=>{const n=siteNotices.find(x=>String(x.id)===b.dataset.editNotice);if(!n)return;$('noticeEditId').value=n.id;$('noticeTitle').value=n.title;$('noticeContent').value=n.content;$('noticeSave').textContent='수정 저장';$('noticeTitle').focus()});
+ $('noticeAdminList').querySelectorAll('[data-delete-notice]').forEach(b=>b.onclick=async()=>{const n=siteNotices.find(x=>String(x.id)===b.dataset.deleteNotice);if(!n||!confirm('이 공지사항을 삭제할까요?'))return;b.disabled=true;const {error}=await client.from('guide_notices').delete().eq('id',n.id);if(error){showNotice('공지 삭제 실패: '+error.message);b.disabled=false;return}await loadNotices();redraw()});};
+ $('noticeReset').onclick=()=>{$('noticeEditorForm').reset();$('noticeEditId').value='';$('noticeSave').textContent='공지 등록'};
+ $('noticeBack').onclick=adminPanel;
+ $('noticeEditorForm').onsubmit=async e=>{e.preventDefault();const title=$('noticeTitle').value.trim(),content=$('noticeContent').value.trim(),id=$('noticeEditId').value;if(!title||!content)return;const btn=$('noticeSave');btn.disabled=true;
+ try{const query=id?client.from('guide_notices').update({title,content}).eq('id',id):client.from('guide_notices').insert({title,content});const {error}=await query;if(error)throw error;await loadNotices();$('noticeReset').click();redraw();showNotice(id?'공지사항을 수정했습니다.':'공지사항을 등록했습니다.')}catch(err){showNotice('공지 저장 실패: '+err.message)}finally{if(btn.isConnected)btn.disabled=false}};
+ redraw();
+}
 function adminPanel(){
  if(!client){openModal('관리자 안내','<p class="notice">데이터 서비스에 연결되지 않았습니다.</p>');return}
  if(!currentUser){accountPanel();return}
  if(!admin){openModal('관리자 권한 없음','<p class="notice">로그인은 완료되었지만 관리자 권한이 없는 계정입니다.</p><p class="small">관리자 권한은 Supabase guide_admins 테이블에서 별도로 지정합니다.</p>');return}
- openModal('관리자 페이지',`<p>등록된 공략: ${posts.length}개</p><div class="actions"><button class="btn" id="newPost">새 공략 등록</button><button class="ghost" id="manageGuides">📋 공략 관리 목록</button><button class="ghost" id="manageCategories">📂 카테고리 관리</button><button class="ghost" id="editSiteBrand">✏️ 사이트 이름 변경</button><button class="ghost" id="manageCouponRequests">🗑️ 쿠폰 삭제 요청 관리</button><button class="ghost" id="logout">로그아웃</button></div><p class="small">기존 공략은 목록에서 자세히 보기 → 수정/삭제로 관리할 수 있습니다.</p>`);
- $('newPost').onclick=()=>editor();$('manageGuides').onclick=adminGuideList;$('manageCategories').onclick=manageCategories;$('editSiteBrand').onclick=editSiteBrand;$('manageCouponRequests').onclick=manageCouponRequests;
+ openModal('관리자 페이지',`<p>등록된 공략: ${posts.length}개</p><div class="actions"><button class="btn" id="newPost">새 공략 등록</button><button class="ghost" id="manageGuides">📋 공략 관리 목록</button><button class="ghost" id="manageCategories">📂 카테고리 관리</button><button class="ghost" id="manageNotices">📢 공지사항 관리</button><button class="ghost" id="editSiteBrand">✏️ 사이트 이름 변경</button><button class="ghost" id="manageCouponRequests">🗑️ 쿠폰 삭제 요청 관리</button><button class="ghost" id="logout">로그아웃</button></div><p class="small">기존 공략은 목록에서 자세히 보기 → 수정/삭제로 관리할 수 있습니다.</p>`);
+ $('newPost').onclick=()=>editor();$('manageGuides').onclick=adminGuideList;$('manageCategories').onclick=manageCategories;$('manageNotices').onclick=manageNotices;$('editSiteBrand').onclick=editSiteBrand;$('manageCouponRequests').onclick=manageCouponRequests;
  $('logout').onclick=async()=>{const {error}=await client.auth.signOut();if(error)return showNotice(error.message);closeModal()};
 }
 $('adminBtn').onclick=adminPanel;$('couponBtn').onclick=couponPanel;
