@@ -3,7 +3,7 @@
 
 /* 블로그형 공략 편집기 */
 .rich-toolbar button.format-active{outline:3px solid #e7c278;outline-offset:1px;box-shadow:0 0 0 2px #182334 inset}.color-palette{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
-.rich-toolbar{display:flex;flex-wrap:wrap;gap:6px;padding:9px;background:#101b2b;border:1px solid var(--edge);border-radius:10px 10px 0 0}.rich-toolbar button,.rich-toolbar select,.rich-toolbar input[type=color]{min-height:34px;padding:5px 9px;border:1px solid #536078;background:#26374a;color:white;border-radius:7px}.rich-toolbar input[type=color]{width:42px;padding:3px}.rich-editor{min-height:240px;max-height:52vh;overflow:auto;background:#0f1927;border:1px solid var(--edge);border-top:0;border-radius:0 0 10px 10px;padding:15px;line-height:1.8;outline:none;overflow-wrap:anywhere}.rich-editor:focus{border-color:var(--gold)}.rich-editor img,.article img{max-width:100%;height:auto;border-radius:8px}.rich-editor a,.article a{color:#9dccff}.rich-editor h2,.article h2{color:var(--gold)}.article.rich-content{white-space:normal;overflow-wrap:anywhere}.article.rich-content p{margin:0 0 1em}.rich-editor:empty:before{content:attr(data-placeholder);color:#8d9eb1;pointer-events:none}.rich-toolbar button:focus-visible{outline:2px solid var(--gold)}.color-palette{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.color-palette span{font-size:13px;white-space:nowrap}
+.rich-toolbar{display:flex;flex-wrap:wrap;gap:6px;padding:9px;background:#101b2b;border:1px solid var(--edge);border-radius:10px 10px 0 0}.rich-toolbar button,.rich-toolbar select,.rich-toolbar input[type=color]{min-height:34px;padding:5px 9px;border:1px solid #536078;background:#26374a;color:white;border-radius:7px}.rich-toolbar input[type=color]{width:42px;padding:3px}.rich-editor{color:#fff;min-height:240px;max-height:52vh;overflow:auto;background:#0f1927;border:1px solid var(--edge);border-top:0;border-radius:0 0 10px 10px;padding:15px;line-height:1.8;outline:none;overflow-wrap:anywhere}.rich-editor:focus{border-color:var(--gold)}.rich-editor img,.article img{max-width:100%;height:auto;border-radius:8px}.rich-editor a,.article a{color:#9dccff}.rich-editor h2,.article h2{color:var(--gold)}.article.rich-content{white-space:normal;overflow-wrap:anywhere}.article.rich-content p{margin:0 0 1em}.rich-editor:empty:before{content:attr(data-placeholder);color:#8d9eb1;pointer-events:none}.rich-toolbar button:focus-visible{outline:2px solid var(--gold)}.color-palette{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.color-palette span{font-size:13px;white-space:nowrap}
 
 /* 공략 목록 카드 개선: 기존 데이터 및 편집기 유지 */
 .cards{align-items:stretch}
@@ -286,8 +286,8 @@ body{background:radial-gradient(ellipse at top,#493022 0%,#1a100d 62%,#100b09 10
 
 /* 공략 편집기 서식 가독성 개선 */
 .rich-editor{color:#ffffff!important;font-style:normal;font-weight:400}
-.rich-editor strong,.rich-editor b,.article.rich-content strong,.article.rich-content b{font-weight:900!important;text-shadow:0 0 .35px currentColor}
-.rich-editor em,.rich-editor i,.article.rich-content em,.article.rich-content i{font-style:italic!important;font-synthesis:style;display:inline}
+.rich-editor strong,.rich-editor b,.article.rich-content strong,.article.rich-content b{font-weight:900!important;text-shadow:0 0 .7px currentColor;-webkit-text-stroke:.3px currentColor}
+.rich-editor em,.rich-editor i,.article.rich-content em,.article.rich-content i{font-style:italic!important;font-synthesis:style;display:inline;transform:skewX(-7deg)}
 .rich-editor u,.article.rich-content u{text-decoration:underline!important;text-underline-offset:3px}
 .rich-editor [style*="font-weight: bold"],.article.rich-content [style*="font-weight: bold"]{font-weight:900!important}
 .rich-toolbar button[data-cmd="bold"]{font-weight:900!important}
@@ -495,34 +495,34 @@ function editor(p){if(client&&!admin){showNotice('관리자 권한이 필요합�
   toolbarRoot.querySelectorAll('button').forEach(b=>{b.addEventListener('pointerdown',e=>{rememberSelection();if(e.pointerType==='mouse')e.preventDefault()});b.addEventListener('touchstart',rememberSelection,{passive:true})});
   function selectedTextRange(){if(!selectedRange||selectedRange.collapsed||!inside(selectedRange))return null;return selectedRange.cloneRange()}
   function applyToSelected(tag,style){const r=selectedTextRange();if(!r)return false;const wrapper=document.createElement(tag);if(style)Object.assign(wrapper.style,style);try{wrapper.appendChild(r.extractContents());r.insertNode(wrapper);const after=document.createRange();after.selectNodeContents(wrapper);selectedRange=after.cloneRange();const sel=window.getSelection();sel.removeAllRanges();sel.addRange(after);ed.dispatchEvent(new Event('input',{bubbles:true}));return true}catch(err){console.warn('선택 서식 실패',err);return false}}
-  function applyFormat(cmd){rememberSelection();if(selectedTextRange()){
-      if(cmd==='italic'||cmd==='underline'||cmd==='bold'){applyToSelected({italic:'em',underline:'u',bold:'strong'}[cmd],cmd==='bold'?{fontWeight:'900'}:cmd==='italic'?{fontStyle:'italic'}:null);syncToolbar();return}
-    }
-    pending[cmd]=!pending[cmd];syncToolbar();
+  // Browser-native formatting keeps Korean IME, spaces, and subsequent typing intact.
+  // Preserve the editor caret when the user taps a formatting control on mobile.
+  function nativeFormat(command,value=null){
+    restoreSelection();
+    document.execCommand('styleWithCSS',false,true);
+    document.execCommand(command,false,value);
+    rememberSelection();
+    ed.dispatchEvent(new Event('input',{bubbles:true}));
+    updateNativeToolbar();
   }
-  toolbarRoot.querySelectorAll('[data-cmd]').forEach(b=>b.onclick=()=>applyFormat(b.dataset.cmd));
-  toolbarRoot.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{restoreSelection();document.execCommand('formatBlock',false,b.dataset.block);rememberSelection()});
+  function updateNativeToolbar(){
+    ['bold','italic','underline'].forEach(cmd=>{
+      const btn=toolbarRoot.querySelector('[data-cmd="'+cmd+'"]');
+      if(!btn)return;
+      let active=false;try{active=document.queryCommandState(cmd)}catch(e){}
+      btn.classList.toggle('format-active',active);
+      btn.setAttribute('aria-pressed',String(active));
+    });
+  }
+  toolbarRoot.querySelectorAll('[data-cmd]').forEach(btn=>btn.onclick=()=>nativeFormat(btn.dataset.cmd));
+  toolbarRoot.querySelectorAll('[data-block]').forEach(btn=>btn.onclick=()=>nativeFormat('formatBlock',btn.dataset.block));
   toolbarRoot.querySelectorAll('[data-text-color]').forEach(btn=>btn.onclick=()=>{
-    rememberSelection();const color=btn.dataset.textColor;if(!/^#[0-9a-fA-F]{6}$/.test(color))return;
-    if(selectedTextRange()){applyToSelected('span',{color});return}
-    pending.color=pending.color===color?null:color;syncToolbar();
+    const color=btn.dataset.textColor;
+    if(/^#[0-9a-fA-F]{6}$/.test(color))nativeFormat('foreColor',color);
   });
-  // Insert formatted text directly: unlike execCommand, this survives iOS focus changes.
-  // beforeinput handles physical and software keyboards; composition is left to the browser.
-  let composing=false;ed.addEventListener('compositionstart',()=>{composing=true});ed.addEventListener('compositionend',()=>{composing=false});
-  ed.addEventListener('beforeinput',e=>{
-    if(composing||e.isComposing||e.inputType!=='insertText'||!e.data||!(pending.color||pending.bold||pending.italic||pending.underline))return;
-    const sel=window.getSelection();if(!sel||!sel.rangeCount||!inside(sel.getRangeAt(0)))return;
-    e.preventDefault();const r=sel.getRangeAt(0);r.deleteContents();let node=document.createTextNode(e.data);
-    if(pending.bold){const el=document.createElement('strong');el.appendChild(node);node=el}
-    if(pending.italic){const el=document.createElement('em');el.appendChild(node);node=el}
-    if(pending.underline){const el=document.createElement('u');el.appendChild(node);node=el}
-    if(pending.color){const el=document.createElement('span');el.style.color=pending.color;el.appendChild(node);node=el}
-    r.insertNode(node);r.setStartAfter(node);r.collapse(true);sel.removeAllRanges();sel.addRange(r);rememberSelection();ed.dispatchEvent(new Event('input',{bubbles:true}));
-  });
-  // On iOS, Korean IME composition does not always expose insertText. For collapsed
-  // selections, create a styled typing container at the caret on focus/tap.
-  ed.addEventListener('focus',()=>{if(!(pending.color||pending.bold||pending.italic||pending.underline))return;});
+  ed.addEventListener('keyup',updateNativeToolbar);
+  ed.addEventListener('mouseup',updateNativeToolbar);
+  ed.addEventListener('touchend',updateNativeToolbar);
   syncToolbar();
  $('richLink').onclick=()=>{rememberSelection();const url=prompt('링크 주소를 입력하세요 (https://...)');if(!url)return;try{const u=new URL(url);if(!['https:','http:'].includes(u.protocol))throw Error();restoreSelection();document.execCommand('createLink',false,u.href);rememberSelection()}catch{showNotice('http 또는 https 주소를 입력해 주세요.')}};
  $('richImage').onclick=()=>{rememberSelection();$('richImageFile').click()};
