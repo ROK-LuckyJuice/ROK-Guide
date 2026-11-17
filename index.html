@@ -273,7 +273,17 @@ body{background:radial-gradient(ellipse at top,#493022 0%,#1a100d 62%,#100b09 10
 .site-notice-foot input{width:18px;height:18px;accent-color:#75461f}
 .site-notice-close{padding:9px 17px;background:#522517;color:#fff1cc;border:1px solid #bd8e49;border-radius:5px;font-weight:700}
 @media(max-width:480px){.site-notice-head{font-size:19px}.site-notice-foot{justify-content:space-between}.site-notice-body{padding:10px 15px}}
-</style><script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js" defer></script></head><body><div class="wrap"><header class="top"><div class="brand" id="brand">#252 CROW | 달콩쓰</div><div class="actions"><button class="ghost" id="couponBtn">🎁 쿠폰코드</button><button class="ghost" id="accountBtn">👤 로그인 / 회원가입</button><button class="ghost" id="adminBtn">⚙️ 관리자</button></div></header><details class="notice-board" id="noticeBoard"><summary>📢 공지사항 <span id="noticeCount" style="font-size:13px;font-weight:normal">불러오는 중</span></summary><div class="notice-list" id="noticeList"><div class="notice-empty">공지를 불러오는 중입니다.</div></div></details><div id="siteNoticeOverlay" class="site-notice-overlay" role="dialog" aria-modal="true" aria-labelledby="siteNoticeHeading" hidden style="display:none"><div class="site-notice-popup"><div class="site-notice-head" id="siteNoticeHeading">📢 공지사항</div><div id="siteNoticePopupBody" class="site-notice-body"></div><div class="site-notice-foot"><label><input type="checkbox" id="siteNoticeSkipDay"> 하루 동안 보지 않기</label><button type="button" class="site-notice-close" id="siteNoticeClose">닫기 ✕</button></div></div></div><section class="hero"><div class="small">LAST ASYLUM GUIDE</div><h1>게임 공략</h1><p class="small">초보자부터 숙련자까지, 필요한 공략을 한곳에서</p><div class="search"><input id="search" placeholder="🔍 공략을 검색하세요" aria-label="공략 검색"><button class="btn" id="searchBtn">확인</button></div></section><div class="book-layout"><aside class="book-left"><h2 class="book-label">⚜ 공략 카테고리</h2><nav class="cats" id="cats"></nav></aside><main class="book-center"><section id="postsSection"><div class="section"><h2 id="sectionTitle">전체 공략</h2><span class="small" id="count"></span></div><div class="cards" id="cards"></div></section></main><aside class="book-right"><div class="side-paper"><h2>🔎 공략 검색</h2><div id="sideSearchMount"></div></div><div class="side-paper"><h2>✒ 최근 등록된 공략</h2><div id="recentGuides" class="recent-guides"></div></div><button class="coupon-side" id="couponSideBtn" type="button">🎟 최신 쿠폰 정보 <small>사용 가능한 쿠폰 확인하기 ❯</small></button></aside></div><footer class="footer">팬 제작 공략 사이트 · 원작 게임과 공식 제휴 관계가 없습니다.<p><a href="./privacy.html" style="color:#e7c278">개인정보처리방침</a></p></footer></div>
+
+/* 공지 이미지, 건의사항, 닉네임 */
+.notice-entry img,.site-notice-item img,.notice-admin-item img{display:block;max-width:100%;max-height:360px;object-fit:contain;margin:10px 0;border:2px solid #b38b55;border-radius:7px}
+.notice-nav{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;margin:12px 0}
+.notice-nav .notice-board{flex:1;min-width:210px;margin:0}
+.suggestion-launch{flex:0 0 auto;background:linear-gradient(135deg,#f1dba9,#d4b47a);color:#382315;border:2px solid #a67a40;border-radius:9px;padding:12px 20px;font-weight:800}
+.suggestion-list{display:grid;gap:10px;max-height:54vh;overflow:auto;margin:12px 0}
+.suggestion-item{background:#f0dbb2;color:#3c2919;border:1px solid #987344;border-radius:9px;padding:13px;overflow-wrap:anywhere}
+.suggestion-item p{white-space:pre-wrap;line-height:1.6}.suggestion-item small{color:#735535}
+@media(max-width:480px){.notice-nav{flex-wrap:nowrap;gap:6px}.notice-nav .notice-board{min-width:0;flex:1}.notice-nav .notice-board summary{font-size:13px;padding:12px 8px}.suggestion-launch{flex:0 0 auto;padding:10px 9px;font-size:13px;white-space:nowrap}}
+</style><script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js" defer></script></head><body><div class="wrap"><header class="top"><div class="brand" id="brand">#252 CROW | 달콩쓰</div><div class="actions"><button class="ghost" id="couponBtn">🎁 쿠폰코드</button><button class="ghost" id="accountBtn">👤 로그인 / 회원가입</button><button class="ghost" id="adminBtn">⚙️ 관리자</button></div></header><div class="notice-nav"><details class="notice-board" id="noticeBoard"><summary>📢 공지사항 <span id="noticeCount" style="font-size:13px;font-weight:normal">불러오는 중</span></summary><div class="notice-list" id="noticeList"><div class="notice-empty">공지를 불러오는 중입니다.</div></div></details><button class="suggestion-launch" type="button" id="suggestionBtn">💬 건의사항</button></div><div id="siteNoticeOverlay" class="site-notice-overlay" role="dialog" aria-modal="true" aria-labelledby="siteNoticeHeading" hidden style="display:none"><div class="site-notice-popup"><div class="site-notice-head" id="siteNoticeHeading">📢 공지사항</div><div id="siteNoticePopupBody" class="site-notice-body"></div><div class="site-notice-foot"><label><input type="checkbox" id="siteNoticeSkipDay"> 하루 동안 보지 않기</label><button type="button" class="site-notice-close" id="siteNoticeClose">닫기 ✕</button></div></div></div><section class="hero"><div class="small">LAST ASYLUM GUIDE</div><h1>게임 공략</h1><p class="small">초보자부터 숙련자까지, 필요한 공략을 한곳에서</p><div class="search"><input id="search" placeholder="🔍 공략을 검색하세요" aria-label="공략 검색"><button class="btn" id="searchBtn">확인</button></div></section><div class="book-layout"><aside class="book-left"><h2 class="book-label">⚜ 공략 카테고리</h2><nav class="cats" id="cats"></nav></aside><main class="book-center"><section id="postsSection"><div class="section"><h2 id="sectionTitle">전체 공략</h2><span class="small" id="count"></span></div><div class="cards" id="cards"></div></section></main><aside class="book-right"><div class="side-paper"><h2>🔎 공략 검색</h2><div id="sideSearchMount"></div></div><div class="side-paper"><h2>✒ 최근 등록된 공략</h2><div id="recentGuides" class="recent-guides"></div></div><button class="coupon-side" id="couponSideBtn" type="button">🎟 최신 쿠폰 정보 <small>사용 가능한 쿠폰 확인하기 ❯</small></button></aside></div><footer class="footer">팬 제작 공략 사이트 · 원작 게임과 공식 제휴 관계가 없습니다.<p><a href="./privacy.html" style="color:#e7c278">개인정보처리방침</a></p></footer></div>
 <div class="modal" id="modal"><div class="dialog"><div class="section"><h2 id="modalTitle">안내</h2><button class="ghost" id="closeModal">닫기 ✕</button></div><div id="modalBody"></div></div></div>
 <script>
 const DEFAULT_CATS=[['beginner','초보자 가이드','🌱'],['heroes','영웅','👑'],['guild','길드전','⚔️'],['warrior','전사','🛡️'],['ranger','레인저','🏹'],['other','기타 공략','📖'],['mage','마법사','🔮']];let hiddenCategoryItems=[];let categoryItems=DEFAULT_CATS.map(([id,name,emoji],i)=>({id,name,emoji,image_url:null,sort_order:i,is_calculator:id==='calculator'}));let CATS=categoryItems.map(c=>[c.name,c.emoji]);function syncCats(){CATS=categoryItems.map(c=>[c.name,c.emoji]);}function calcCatName(){return categoryItems.find(c=>c.is_calculator)?.name||'계산기'}function isCalcCat(name){return name===calcCatName()}function catByName(name){return categoryItems.find(c=>c.name===name)}function categoryIcon(c){return c?.image_url&&/^https:\/\//i.test(c.image_url)?`<img src="${esc(c.image_url)}" alt="" loading="lazy" style="width:42px;height:42px;object-fit:contain">`:esc(c?.emoji||'📖')}const $=id=>document.getElementById(id);let category='',query='',posts=[],admin=false,client=null,currentUser=null;const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -290,12 +300,23 @@ async function init(){if(CONFIG.url&&CONFIG.anonKey){try{const {createClient}=aw
 async function updateIdentity(session){
  currentUser=session?.user||null;admin=false;
  if(client&&currentUser){try{const {data,error}=await client.from('guide_admins').select('user_id').eq('user_id',currentUser.id).maybeSingle();if(error)console.warn('관리자 권한 확인:',error.message);else admin=!!data}catch(e){console.warn('관리자 권한 확인 실패:',e)}}
- accountEmailVisible=false;const account=$('accountBtn');if(account){account.textContent=currentUser?'👤':'👤 로그인 / 회원가입';account.title=currentUser?'계정 정보 보기':'로그인 / 회원가입';account.setAttribute('aria-label',currentUser?'계정 정보 보기':'로그인 / 회원가입');}
+ accountEmailVisible=false;currentNickname='';
+ if(currentUser&&client){try{const {data}=await client.from('guide_profiles').select('nickname').eq('user_id',currentUser.id).maybeSingle();currentNickname=data?.nickname||''}catch(e){console.warn('닉네임 조회 실패',e)}}
+ refreshNicknameButton();
  render();
+}
+function displayRokNickname(name){const clean=String(name||'').trim().replace(/^\[ROK\]\s*/i,'');return clean?'[ROK]'+clean:'닉네임 설정';}
+function refreshNicknameButton(){const b=$('accountBtn');if(!b)return;b.textContent=currentUser?'👤 '+displayRokNickname(currentNickname):'👤 로그인 / 회원가입';b.title=currentUser?'클릭하여 닉네임 설정 / 계정 관리':'로그인 / 회원가입';}
+async function saveNickname(){
+ const nickname=($('nicknameInput')?.value.trim()||'').replace(/^\[ROK\]\s*/i,'');
+ if(nickname.length<2||nickname.length>20)return showNotice('닉네임은 2~20자로 입력해 주세요.');
+ const {error}=await client.from('guide_profiles').upsert({user_id:currentUser.id,nickname},{onConflict:'user_id'});
+ if(error)return showNotice('닉네임 저장 실패: '+error.message);
+ currentNickname=nickname;refreshNicknameButton();showNotice('닉네임이 저장되었습니다.');accountPanel();
 }
 function accountPanel(){
  if(!client){showNotice('로그인 서비스에 연결되지 않았습니다.');return}
- if(currentUser){openModal('내 계정',`<p class="notice">로그인 계정: ${esc(currentUser.email||'')}</p><p class="small">${admin?'관리자 계정':'일반 회원 계정'}</p><div class="actions"><button class="ghost" id="accountLogout">로그아웃</button></div>`);$('accountLogout').onclick=async()=>{const {error}=await client.auth.signOut();if(error)return showNotice(error.message);closeModal()};return}
+ if(currentUser){openModal('내 계정',`<p class="notice">👤 ${esc(currentNickname?displayRokNickname(currentNickname):'닉네임 미설정')}</p><div class="field"><label>닉네임 (2~20자, [ROK] 자동 표시)</label><input id="nicknameInput" maxlength="20" value="${esc(currentNickname)}" placeholder="닉네임을 입력하세요"></div><div class="actions"><button class="btn" id="saveNicknameBtn">닉네임 저장</button><button class="ghost" id="accountLogout">로그아웃</button></div><p class="small">${admin?'관리자 계정':'일반 회원 계정'}</p>`);$('saveNicknameBtn').onclick=saveNickname;$('accountLogout').onclick=async()=>{const {error}=await client.auth.signOut();if(error)return showNotice(error.message);closeModal()};return}
  openModal('로그인 / 회원가입',`<div class="actions"><button class="btn" id="googleLogin" type="button">Google로 로그인</button></div><p class="small">Google 로그인 후 사이트로 돌아옵니다.</p><hr style="border:0;border-top:1px solid #40536a;margin:18px 0"><form id="accountForm"><div class="field"><label for="memberEmail">이메일</label><input id="memberEmail" type="email" autocomplete="email" required></div><div class="field"><label for="memberPassword">비밀번호 (6자 이상)</label><input id="memberPassword" type="password" minlength="6" autocomplete="current-password" required></div><div class="actions"><button class="btn" type="submit" id="emailLogin">이메일 로그인</button><button class="ghost" type="button" id="emailSignup">이메일 회원가입</button></div></form><p class="small">이메일 확인 설정에 따라 가입 후 인증 메일이 발송될 수 있습니다.</p>`);
  $('googleLogin').onclick=async()=>{const {error}=await client.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});if(error)showNotice('Google 로그인 실패: '+error.message)};
  const credentials=()=>({email:$('memberEmail').value.trim(),password:$('memberPassword').value});
@@ -303,7 +324,8 @@ function accountPanel(){
  $('emailSignup').onclick=async()=>{const {email,password}=credentials();if(!email||password.length<6){showNotice('이메일과 6자 이상 비밀번호를 입력해 주세요.');return}const btn=$('emailSignup');btn.disabled=true;try{const {data,error}=await client.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});if(error)throw error;if(data.session){showNotice('회원가입 및 로그인 완료!');closeModal()}else{openModal('📩 이메일 인증이 필요합니다',`<div class="notice" style="line-height:1.9;padding:18px"><strong style="color:var(--gold);font-size:18px">회원가입 신청이 완료되었습니다.</strong><p>입력하신 이메일 주소 <strong>${esc(email)}</strong>로 인증 메일이 발송되었는지 확인해 주세요.</p><p><strong>1.</strong> 이메일 받은편지함 확인<br><strong>2.</strong> 인증 메일의 링크 클릭<br><strong>3.</strong> 인증 완료 후 이메일 로그인</p><p class="small">메일이 보이지 않으면 스팸메일함도 확인해 주세요. 인증이 완료되기 전에는 로그인이 제한될 수 있습니다.</p></div><div class="actions" style="margin-top:16px"><button type="button" class="btn" id="backToMemberLogin">로그인 화면으로 돌아가기</button></div>`);$('backToMemberLogin').onclick=accountPanel}}catch(e){showNotice('회원가입 실패: '+e.message)}finally{btn.disabled=false}};
 }
 let accountEmailVisible=false;
-$('accountBtn').onclick=()=>{if(!currentUser){accountPanel();return}accountEmailVisible=!accountEmailVisible;const b=$('accountBtn');b.textContent=accountEmailVisible?'👤 '+(currentUser.email||'내 계정'):'👤';b.setAttribute('aria-expanded',String(accountEmailVisible));};
+let currentNickname='';
+$('accountBtn').onclick=accountPanel;
 const DEFAULT_SITE_BRAND='#252 CROW | 달콩쓰';
 async function loadSiteBrand(){
   if(!client)return;
@@ -634,7 +656,7 @@ function maybeShowSiteNoticePopup(){
  let hiddenUntil=0;try{hiddenUntil=Number(localStorage.getItem(NOTICE_SKIP_KEY)||0)}catch(e){}
  if(Date.now()<hiddenUntil)return;
  const overlay=$('siteNoticeOverlay'),body=$('siteNoticePopupBody');if(!overlay||!body)return;
- body.innerHTML=siteNotices.map(n=>`<article class="site-notice-item"><strong>${esc(n.title)}</strong><time>${esc((n.created_at||'').slice(0,10))}</time><div>${esc(n.content)}</div></article>`).join('');
+ body.innerHTML=siteNotices.map(n=>`<article class="site-notice-item"><strong>${esc(n.title)}</strong><time>${esc((n.created_at||'').slice(0,10))}</time><div>${esc(n.content)}</div>${n.image_url?`<img src="${esc(n.image_url)}" alt="공지 첨부 이미지" loading="lazy">`:''}</article>`).join('');
  siteNoticePopupShown=true;overlay.hidden=false;overlay.style.display='flex';document.body.style.overflow='hidden';
  $('siteNoticeSkipDay').checked=false;
  $('siteNoticeClose').focus();
@@ -643,27 +665,50 @@ $('siteNoticeClose').addEventListener('click',closeSiteNoticePopup);
 $('siteNoticeOverlay').addEventListener('click',e=>{if(e.target===$('siteNoticeOverlay'))closeSiteNoticePopup()});
 async function loadNotices(){
  if(!client)return;
- const {data,error}=await client.from('guide_notices').select('id,title,content,created_at,updated_at').order('created_at',{ascending:false}).limit(100);
+ const {data,error}=await client.from('guide_notices').select('id,title,content,image_url,created_at,updated_at').order('created_at',{ascending:false}).limit(100);
  const list=$('noticeList'), count=$('noticeCount');
  if(error){console.warn('공지사항:',error.message);if(list)list.innerHTML='<div class="notice-empty">공지사항을 불러올 수 없습니다. 관리자에게 문의해 주세요.</div>';if(count)count.textContent='';return}
  siteNotices=data||[];
  if(count)count.textContent=siteNotices.length+'건';
- if(list)list.innerHTML=siteNotices.length?siteNotices.map(n=>`<article class="notice-entry"><strong>${esc(n.title)}</strong><time>${esc((n.created_at||'').slice(0,10))}</time><div>${esc(n.content)}</div></article>`).join(''):'<div class="notice-empty">등록된 공지사항이 없습니다.</div>';
+ if(list)list.innerHTML=siteNotices.length?siteNotices.map(n=>`<article class="notice-entry"><strong>${esc(n.title)}</strong><time>${esc((n.created_at||'').slice(0,10))}</time><div>${esc(n.content)}</div>${n.image_url?`<img src="${esc(n.image_url)}" alt="공지 첨부 이미지" loading="lazy">`:''}</article>`).join(''):'<div class="notice-empty">등록된 공지사항이 없습니다.</div>';
  maybeShowSiteNoticePopup();
 }
 async function manageNotices(){
  if(!admin||!currentUser)return showNotice('관리자 권한이 필요합니다.');
  await loadNotices();
- openModal('📢 공지사항 관리',`<p class="small">공지사항은 홈페이지 상단에 표시됩니다. 관리자만 등록·수정·삭제할 수 있습니다.</p><form id="noticeEditorForm"><input type="hidden" id="noticeEditId"><div class="field"><label for="noticeTitle">제목</label><input id="noticeTitle" maxlength="120" required placeholder="공지 제목"></div><div class="field"><label for="noticeContent">내용</label><textarea id="noticeContent" maxlength="10000" required placeholder="공지 내용을 입력하세요"></textarea></div><div class="actions"><button class="btn" type="submit" id="noticeSave">공지 등록</button><button class="ghost" type="button" id="noticeReset">새 공지 작성</button></div></form><div class="notice-admin-list" id="noticeAdminList"></div><div class="actions"><button class="ghost" id="noticeBack">← 관리자 페이지</button></div>`);
- const redraw=()=>{$('noticeAdminList').innerHTML=siteNotices.length?siteNotices.map(n=>`<div class="notice-admin-item"><strong>${esc(n.title)}</strong><p>${esc(n.content)}</p><div class="actions"><button class="ghost" data-edit-notice="${esc(n.id)}">수정</button><button class="ghost" data-delete-notice="${esc(n.id)}">삭제</button></div></div>`).join(''):'<p class="small">등록된 공지사항이 없습니다.</p>';
- $('noticeAdminList').querySelectorAll('[data-edit-notice]').forEach(b=>b.onclick=()=>{const n=siteNotices.find(x=>String(x.id)===b.dataset.editNotice);if(!n)return;$('noticeEditId').value=n.id;$('noticeTitle').value=n.title;$('noticeContent').value=n.content;$('noticeSave').textContent='수정 저장';$('noticeTitle').focus()});
+ openModal('📢 공지사항 관리',`<p class="small">공지사항은 홈페이지 상단에 표시됩니다. 관리자만 등록·수정·삭제할 수 있습니다.</p><form id="noticeEditorForm"><input type="hidden" id="noticeEditId"><div class="field"><label for="noticeTitle">제목</label><input id="noticeTitle" maxlength="120" required placeholder="공지 제목"></div><div class="field"><label for="noticeContent">내용</label><textarea id="noticeContent" maxlength="10000" required placeholder="공지 내용을 입력하세요"></textarea></div><div class="field"><label for="noticeImage">공지 이미지 (선택, 5MB 이하)</label><input type="file" id="noticeImage" accept="image/png,image/jpeg,image/webp,image/gif"><div id="noticeImagePreview"></div><label><input type="checkbox" id="noticeRemoveImage"> 기존 이미지 삭제</label></div><div class="actions"><button class="btn" type="submit" id="noticeSave">공지 등록</button><button class="ghost" type="button" id="noticeReset">새 공지 작성</button></div></form><div class="notice-admin-list" id="noticeAdminList"></div><div class="actions"><button class="ghost" id="noticeBack">← 관리자 페이지</button></div>`);
+ const redraw=()=>{$('noticeAdminList').innerHTML=siteNotices.length?siteNotices.map(n=>`<div class="notice-admin-item"><strong>${esc(n.title)}</strong><p>${esc(n.content)}</p>${n.image_url?`<img src="${esc(n.image_url)}" alt="첨부 이미지" loading="lazy">`:''}<div class="actions"><button class="ghost" data-edit-notice="${esc(n.id)}">수정</button><button class="ghost" data-delete-notice="${esc(n.id)}">삭제</button></div></div>`).join(''):'<p class="small">등록된 공지사항이 없습니다.</p>';
+ $('noticeAdminList').querySelectorAll('[data-edit-notice]').forEach(b=>b.onclick=()=>{const n=siteNotices.find(x=>String(x.id)===b.dataset.editNotice);if(!n)return;$('noticeEditId').value=n.id;$('noticeTitle').value=n.title;$('noticeContent').value=n.content;$('noticeRemoveImage').checked=false;$('noticeImagePreview').innerHTML=n.image_url?`<img style="max-width:100%;max-height:180px" src="${esc(n.image_url)}" alt="기존 이미지">`:'';$('noticeSave').textContent='수정 저장';$('noticeTitle').focus()});
  $('noticeAdminList').querySelectorAll('[data-delete-notice]').forEach(b=>b.onclick=async()=>{const n=siteNotices.find(x=>String(x.id)===b.dataset.deleteNotice);if(!n||!confirm('이 공지사항을 삭제할까요?'))return;b.disabled=true;const {error}=await client.from('guide_notices').delete().eq('id',n.id);if(error){showNotice('공지 삭제 실패: '+error.message);b.disabled=false;return}await loadNotices();redraw()});};
- $('noticeReset').onclick=()=>{$('noticeEditorForm').reset();$('noticeEditId').value='';$('noticeSave').textContent='공지 등록'};
+ $('noticeReset').onclick=()=>{$('noticeEditorForm').reset();$('noticeEditId').value='';$('noticeSave').textContent='공지 등록';$('noticeImagePreview').innerHTML=''};
  $('noticeBack').onclick=adminPanel;
  $('noticeEditorForm').onsubmit=async e=>{e.preventDefault();const title=$('noticeTitle').value.trim(),content=$('noticeContent').value.trim(),id=$('noticeEditId').value;if(!title||!content)return;const btn=$('noticeSave');btn.disabled=true;
- try{const query=id?client.from('guide_notices').update({title,content}).eq('id',id):client.from('guide_notices').insert({title,content});const {error}=await query;if(error)throw error;await loadNotices();$('noticeReset').click();redraw();showNotice(id?'공지사항을 수정했습니다.':'공지사항을 등록했습니다.')}catch(err){showNotice('공지 저장 실패: '+err.message)}finally{if(btn.isConnected)btn.disabled=false}};
+ try{let image_url=id?(siteNotices.find(n=>String(n.id)===id)?.image_url||null):null;
+ const imageFile=$('noticeImage').files[0];if(imageFile)image_url=await uploadImage(imageFile);
+ else if($('noticeRemoveImage').checked)image_url=null;
+ const query=id?client.from('guide_notices').update({title,content,image_url}).eq('id',id):client.from('guide_notices').insert({title,content,image_url});const {error}=await query;if(error)throw error;await loadNotices();$('noticeReset').click();redraw();showNotice(id?'공지사항을 수정했습니다.':'공지사항을 등록했습니다.')}catch(err){showNotice('공지 저장 실패: '+err.message)}finally{if(btn.isConnected)btn.disabled=false}};
  redraw();
 }
+
+async function suggestionsPanel(){
+ if(!client)return showNotice('데이터 서비스에 연결되지 않았습니다.');
+ openModal('💬 건의사항',`<p class="small">건의사항은 누구나 읽을 수 있으며, 로그인한 회원만 작성할 수 있습니다.</p><div id="suggestionWrite"></div><div class="suggestion-list" id="suggestionList">불러오는 중...</div>`);
+ const w=$('suggestionWrite');
+ if(currentUser){w.innerHTML=`<form id="suggestionForm"><div class="field"><label>제목</label><input id="suggestionTitle" maxlength="120" required></div><div class="field"><label>내용</label><textarea id="suggestionContent" maxlength="5000" required></textarea></div><button class="btn" type="submit">건의사항 등록</button></form>`;
+ $('suggestionForm').onsubmit=async e=>{e.preventDefault();const title=$('suggestionTitle').value.trim(),content=$('suggestionContent').value.trim();if(!title||!content)return;const b=e.submitter||$('suggestionForm').querySelector('button');b.disabled=true;try{const {error}=await client.from('guide_suggestions').insert({user_id:currentUser.id,title,content});if(error)throw error;$('suggestionForm').reset();await refreshSuggestions();showNotice('건의사항이 등록되었습니다.')}catch(err){showNotice('등록 실패: '+err.message)}finally{b.disabled=false}};
+ }else{w.innerHTML='<p class="notice">건의사항을 작성하려면 로그인해 주세요.</p><button class="ghost" id="suggestionLogin">로그인 / 회원가입</button>';$('suggestionLogin').onclick=accountPanel}
+ await refreshSuggestions();
+}
+async function refreshSuggestions(){
+ const list=$('suggestionList');if(!list)return;
+ const {data,error}=await client.from('guide_suggestions').select('id,user_id,title,content,created_at').order('created_at',{ascending:false}).limit(100);
+ if(error){list.textContent='건의사항을 불러올 수 없습니다: '+error.message;return}
+ const suggestions=data||[], ids=[...new Set(suggestions.map(x=>x.user_id))];
+ let names={};if(ids.length){const {data:profiles}=await client.from('guide_profiles').select('user_id,nickname').in('user_id',ids);for(const p of profiles||[])names[p.user_id]=p.nickname}
+ list.innerHTML=suggestions.length?suggestions.map(x=>`<article class="suggestion-item"><strong>${esc(x.title)}</strong><div><small>👤 ${esc(names[x.user_id]?displayRokNickname(names[x.user_id]):'회원')} · ${esc((x.created_at||'').slice(0,10))}</small></div><p>${esc(x.content)}</p>${(currentUser&&(admin||currentUser.id===x.user_id))?`<button class="ghost" data-delete-suggestion="${esc(x.id)}">삭제</button>`:''}</article>`).join(''):'<p class="small">등록된 건의사항이 없습니다.</p>';
+ list.querySelectorAll('[data-delete-suggestion]').forEach(b=>b.onclick=async()=>{if(!confirm('이 건의사항을 삭제할까요?'))return;const {error}=await client.from('guide_suggestions').delete().eq('id',b.dataset.deleteSuggestion);if(error)return showNotice('삭제 실패: '+error.message);await refreshSuggestions()});
+}
+$('suggestionBtn').onclick=suggestionsPanel;
 function adminPanel(){
  if(!client){openModal('관리자 안내','<p class="notice">데이터 서비스에 연결되지 않았습니다.</p>');return}
  if(!currentUser){accountPanel();return}
