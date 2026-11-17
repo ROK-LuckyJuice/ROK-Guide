@@ -232,6 +232,16 @@ body{background:radial-gradient(ellipse at top,#493022 0%,#1a100d 62%,#100b09 10
 #couponList .panel .actions button{color:#ffe4a9;}
  .coupon-tabs{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0 8px}.coupon-tabs button{flex:1;min-width:130px}.coupon-tabs .coupon-tab-active{border-color:#f0c777!important;box-shadow:0 0 0 2px #c49a52,inset 0 1px #fff5!important;background:linear-gradient(160deg,#82502a,#442015)!important;color:#ffe6a8!important;font-weight:900}
 .coupon-used-section{margin-top:18px;border-top:1px solid #98754b;padding-top:13px}.coupon-used-toggle{width:100%;text-align:left;font-size:16px;font-weight:800;padding:14px 16px}.coupon-used-section #couponUsedList{padding-top:7px}
+
+/* 모바일 카테고리: 왼쪽 1~4, 오른쪽 5~8 순서로 세로 배치 */
+@media(max-width:650px){
+  .book-layout .cats{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:repeat(4,auto)!important;
+    grid-auto-flow:column!important;
+  }
+}
 </style><script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js" defer></script></head><body><div class="wrap"><header class="top"><div class="brand" id="brand">#252 CROW | 달콩쓰</div><div class="actions"><button class="ghost" id="couponBtn">🎁 쿠폰코드</button><button class="ghost" id="accountBtn">👤 로그인 / 회원가입</button><button class="ghost" id="adminBtn">⚙️ 관리자</button></div></header><section class="hero"><div class="small">LAST ASYLUM GUIDE</div><h1>게임 공략</h1><p class="small">초보자부터 숙련자까지, 필요한 공략을 한곳에서</p><div class="search"><input id="search" placeholder="🔍 공략을 검색하세요" aria-label="공략 검색"><button class="btn" id="searchBtn">확인</button></div></section><div class="book-layout"><aside class="book-left"><h2 class="book-label">⚜ 공략 카테고리</h2><nav class="cats" id="cats"></nav></aside><main class="book-center"><section id="postsSection"><div class="section"><h2 id="sectionTitle">전체 공략</h2><span class="small" id="count"></span></div><div class="cards" id="cards"></div></section></main><aside class="book-right"><div class="side-paper"><h2>🔎 공략 검색</h2><div id="sideSearchMount"></div></div><div class="side-paper"><h2>✒ 최근 등록된 공략</h2><div id="recentGuides" class="recent-guides"></div></div><button class="coupon-side" id="couponSideBtn" type="button">🎟 최신 쿠폰 정보 <small>사용 가능한 쿠폰 확인하기 ❯</small></button></aside></div><footer class="footer">팬 제작 공략 사이트 · 원작 게임과 공식 제휴 관계가 없습니다.<p><a href="./privacy.html" style="color:#e7c278">개인정보처리방침</a></p></footer></div>
 <div class="modal" id="modal"><div class="dialog"><div class="section"><h2 id="modalTitle">안내</h2><button class="ghost" id="closeModal">닫기 ✕</button></div><div id="modalBody"></div></div></div>
 <script>
