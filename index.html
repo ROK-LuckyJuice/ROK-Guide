@@ -224,6 +224,12 @@ body{background:radial-gradient(ellipse at top,#493022 0%,#1a100d 62%,#100b09 10
 .book-layout .cat > span,.cat > span{background-image:none!important;background-color:transparent!important;}
 .book-layout .cat::after{z-index:1!important;pointer-events:none!important;}
 .book-layout .cat > span{position:relative;z-index:2;}
+
+/* 쿠폰 카드: 밝은 양피지 배경에서 코드/상태/설명이 선명하게 보이도록 조정 */
+#couponList .panel{color:#352315!important;}
+#couponList .panel strong{color:#4c2910!important;font-size:17px;font-weight:900;text-shadow:none!important;}
+#couponList .panel .small,#couponList .panel p{color:#50351e!important;font-weight:700;text-shadow:none!important;}
+#couponList .panel .actions button{color:#ffe4a9;}
 </style><script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js" defer></script></head><body><div class="wrap"><header class="top"><div class="brand" id="brand">#252 CROW | 달콩쓰</div><div class="actions"><button class="ghost" id="couponBtn">🎁 쿠폰코드</button><button class="ghost" id="accountBtn">👤 로그인 / 회원가입</button><button class="ghost" id="adminBtn">⚙️ 관리자</button></div></header><section class="hero"><div class="small">LAST ASYLUM GUIDE</div><h1>게임 공략</h1><p class="small">초보자부터 숙련자까지, 필요한 공략을 한곳에서</p><div class="search"><input id="search" placeholder="🔍 공략을 검색하세요" aria-label="공략 검색"><button class="btn" id="searchBtn">확인</button></div></section><div class="book-layout"><aside class="book-left"><h2 class="book-label">⚜ 공략 카테고리</h2><nav class="cats" id="cats"></nav></aside><main class="book-center"><section id="postsSection"><div class="section"><h2 id="sectionTitle">전체 공략</h2><span class="small" id="count"></span></div><div class="cards" id="cards"></div></section></main><aside class="book-right"><div class="side-paper"><h2>🔎 공략 검색</h2><div id="sideSearchMount"></div></div><div class="side-paper"><h2>✒ 최근 등록된 공략</h2><div id="recentGuides" class="recent-guides"></div></div><button class="coupon-side" id="couponSideBtn" type="button">🎟 최신 쿠폰 정보 <small>사용 가능한 쿠폰 확인하기 ❯</small></button></aside></div><footer class="footer">팬 제작 공략 사이트 · 원작 게임과 공식 제휴 관계가 없습니다.<p><a href="./privacy.html" style="color:#e7c278">개인정보처리방침</a></p></footer></div>
 <div class="modal" id="modal"><div class="dialog"><div class="section"><h2 id="modalTitle">안내</h2><button class="ghost" id="closeModal">닫기 ✕</button></div><div id="modalBody"></div></div></div>
 <script>
