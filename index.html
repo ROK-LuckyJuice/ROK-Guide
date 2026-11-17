@@ -684,7 +684,7 @@ async function manageNotices(){
  $('noticeBack').onclick=adminPanel;
  $('noticeEditorForm').onsubmit=async e=>{e.preventDefault();const title=$('noticeTitle').value.trim(),content=$('noticeContent').value.trim(),id=$('noticeEditId').value;if(!title||!content)return;const btn=$('noticeSave');btn.disabled=true;
  try{let image_url=id?(siteNotices.find(n=>String(n.id)===id)?.image_url||null):null;
- const imageFile=$('noticeImage').files[0];if(imageFile)image_url=await uploadImage(imageFile);
+ const imageFile=$('noticeImage').files[0];if(imageFile)image_url=await uploadGuideImage(imageFile);
  else if($('noticeRemoveImage').checked)image_url=null;
  const query=id?client.from('guide_notices').update({title,content,image_url}).eq('id',id):client.from('guide_notices').insert({title,content,image_url});const {error}=await query;if(error)throw error;await loadNotices();$('noticeReset').click();redraw();showNotice(id?'공지사항을 수정했습니다.':'공지사항을 등록했습니다.')}catch(err){showNotice('공지 저장 실패: '+err.message)}finally{if(btn.isConnected)btn.disabled=false}};
  redraw();
