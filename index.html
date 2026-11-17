@@ -111,6 +111,39 @@ input:focus,textarea:focus,select:focus{outline:2px solid #d3a862;outline-offset
 @media(max-width:700px){.wrap{padding:12px 12px 55px}.top{padding:12px;align-items:flex-start}.top .actions{gap:6px}.top .ghost{padding:8px;font-size:12px}.hero{margin-top:15px;padding:51px 12px 37px}.hero h1{letter-spacing:.02em}.hero p.small{font-size:13px}.cats{gap:10px;margin:20px 0 26px}.cat{min-height:115px;padding:18px 6px 15px;font-size:14px}.cat span{font-size:31px;min-height:45px}.search{gap:4px}.search .btn{padding:11px 13px}.dialog{padding:18px 14px}}
 @media(prefers-reduced-motion:reduce){.cat,.btn,.ghost{transition:none}}
 
+
+/* Aged parchment edition: visual-only overrides, no application logic changed. */
+:root{--panel:#dfc798;--edge:#8a6538;--txt:#f6e9cd;--muted:#d2b991}
+.hero{background:radial-gradient(ellipse at 50% 15%,#704b2d77,transparent 60%),linear-gradient(135deg,#201916,#3b2920 52%,#171b1f)}
+/* Paper grain rendered locally; no external image dependency. */
+.cats .cat,.guide-card-body,.calcgrid .panel{
+ background-color:#d8bd87;
+ background-image:
+ radial-gradient(ellipse at 10% 12%,#fff2c45c 0%,transparent 48%),
+ radial-gradient(ellipse at 92% 90%,#76502b45 0%,transparent 52%),
+ repeating-linear-gradient(112deg,#51371408 0 1px,transparent 1px 5px),
+ linear-gradient(145deg,#e8d5a5,#cfaf76 65%,#e0c48d);
+ color:#382719;border:2px solid #7c542d;
+ box-shadow:inset 0 0 0 4px #d3b17b,inset 0 0 0 6px #9e7946,0 10px 24px #0008;
+}
+.cats .cat{border-radius:5px;min-height:142px;padding:26px 10px 21px;font-family:Georgia,'Malgun Gothic',serif;font-weight:900;font-size:17px;text-shadow:0 1px #fff5}
+.cat::before,.cat::after{color:#68411e;font-size:12px}
+.cat span{filter:drop-shadow(0 2px 2px #9b794e66)}
+.cat.active{border-color:#f0c777;box-shadow:inset 0 0 0 4px #e6c68e,inset 0 0 0 6px #7b5328,0 0 0 3px #edc878,0 12px 25px #0009}
+.card.guide-card{border:2px solid #9b753f;border-radius:6px;box-shadow:0 12px 28px #0009}
+.guide-card-body{flex:1;min-height:195px;padding:23px 22px;border:0;border-top:3px double #8d6334;border-radius:0;box-shadow:inset 0 0 0 5px #9d744536}
+.guide-card h3{color:#392516;text-shadow:0 1px #fff6}
+.guide-card p{color:#5c422b}
+.guide-card .tag,.guide-card .guide-open{color:#81501e}
+.calcgrid .panel{border-radius:6px;color:#35261a}
+.calcgrid .panel h3,.calcgrid .panel p{color:#3f2c1c}
+.calcgrid .panel .result{color:#75451b}
+.calcgrid .panel label{color:#50391f}
+.calcgrid .panel input{background:#f6e6bf;color:#392819;border:1px solid #9d794c}
+.guide-cover{border-bottom:0}
+.section h2{color:#f3d49b}
+@media(max-width:700px){.cats .cat{min-height:121px;font-size:14px;padding:19px 5px 16px}.guide-card-body{min-height:0}}
+
 </style><script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js" defer></script></head><body><div class="wrap"><header class="top"><div class="brand" id="brand">#252 CROW | 달콩쓰</div><div class="actions"><button class="ghost" id="couponBtn">🎁 쿠폰코드</button><button class="ghost" id="accountBtn">👤 로그인 / 회원가입</button><button class="ghost" id="adminBtn">⚙️ 관리자</button></div></header><section class="hero"><div class="small">LAST ASYLUM GUIDE</div><h1>게임 공략</h1><p class="small">초보자부터 숙련자까지, 필요한 공략을 한곳에서</p><div class="search"><input id="search" placeholder="🔍 공략을 검색하세요" aria-label="공략 검색"><button class="btn" id="searchBtn">확인</button></div></section><nav class="cats" id="cats"></nav><section id="postsSection"><div class="section"><h2 id="sectionTitle">전체 공략</h2><span class="small" id="count"></span></div><div class="cards" id="cards"></div></section><section id="calcSection" class="hidden"><div class="section"><h2>🧮 각종 계산기</h2></div><div class="calcgrid"><div class="panel"><h3>전투력 증가 계산기</h3><div class="field"><label>현재 전투력</label><input type="number" id="power" min="0" value="100000"></div><div class="field"><label>증가율 (%)</label><input type="number" id="percent" value="10"></div><p>예상 전투력</p><div class="result" id="powerResult"></div></div><div class="panel"><h3>자원 소요량 계산기</h3><div class="field"><label>1회 소모 자원</label><input type="number" id="unit" min="0" value="500"></div><div class="field"><label>반복 횟수</label><input type="number" id="times" min="0" value="20"></div><p>총 소모량</p><div class="result" id="resourceResult"></div></div></div><p class="small">※ 계산기는 기본 범용 예시입니다. 실제 게임 공식이 확인되면 게임 전용 계산식으로 교체할 수 있습니다.</p></section><footer class="footer">팬 제작 공략 사이트 · 원작 게임과 공식 제휴 관계가 없습니다.<p><a href="./privacy.html" style="color:#e7c278">개인정보처리방침</a></p></footer></div>
 <div class="modal" id="modal"><div class="dialog"><div class="section"><h2 id="modalTitle">안내</h2><button class="ghost" id="closeModal">닫기 ✕</button></div><div id="modalBody"></div></div></div>
 <script>
