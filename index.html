@@ -230,6 +230,8 @@ body{background:radial-gradient(ellipse at top,#493022 0%,#1a100d 62%,#100b09 10
 #couponList .panel strong{color:#4c2910!important;font-size:17px;font-weight:900;text-shadow:none!important;}
 #couponList .panel .small,#couponList .panel p{color:#50351e!important;font-weight:700;text-shadow:none!important;}
 #couponList .panel .actions button{color:#ffe4a9;}
+ .coupon-tabs{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0 8px}.coupon-tabs button{flex:1;min-width:130px}.coupon-tabs .coupon-tab-active{border-color:#f0c777!important;box-shadow:0 0 0 2px #c49a52,inset 0 1px #fff5!important;background:linear-gradient(160deg,#82502a,#442015)!important;color:#ffe6a8!important;font-weight:900}
+.coupon-used-section{margin-top:18px;border-top:1px solid #98754b;padding-top:13px}.coupon-used-toggle{width:100%;text-align:left;font-size:16px;font-weight:800;padding:14px 16px}.coupon-used-section #couponUsedList{padding-top:7px}
 </style><script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js" defer></script></head><body><div class="wrap"><header class="top"><div class="brand" id="brand">#252 CROW | 달콩쓰</div><div class="actions"><button class="ghost" id="couponBtn">🎁 쿠폰코드</button><button class="ghost" id="accountBtn">👤 로그인 / 회원가입</button><button class="ghost" id="adminBtn">⚙️ 관리자</button></div></header><section class="hero"><div class="small">LAST ASYLUM GUIDE</div><h1>게임 공략</h1><p class="small">초보자부터 숙련자까지, 필요한 공략을 한곳에서</p><div class="search"><input id="search" placeholder="🔍 공략을 검색하세요" aria-label="공략 검색"><button class="btn" id="searchBtn">확인</button></div></section><div class="book-layout"><aside class="book-left"><h2 class="book-label">⚜ 공략 카테고리</h2><nav class="cats" id="cats"></nav></aside><main class="book-center"><section id="postsSection"><div class="section"><h2 id="sectionTitle">전체 공략</h2><span class="small" id="count"></span></div><div class="cards" id="cards"></div></section></main><aside class="book-right"><div class="side-paper"><h2>🔎 공략 검색</h2><div id="sideSearchMount"></div></div><div class="side-paper"><h2>✒ 최근 등록된 공략</h2><div id="recentGuides" class="recent-guides"></div></div><button class="coupon-side" id="couponSideBtn" type="button">🎟 최신 쿠폰 정보 <small>사용 가능한 쿠폰 확인하기 ❯</small></button></aside></div><footer class="footer">팬 제작 공략 사이트 · 원작 게임과 공식 제휴 관계가 없습니다.<p><a href="./privacy.html" style="color:#e7c278">개인정보처리방침</a></p></footer></div>
 <div class="modal" id="modal"><div class="dialog"><div class="section"><h2 id="modalTitle">안내</h2><button class="ghost" id="closeModal">닫기 ✕</button></div><div id="modalBody"></div></div></div>
 <script>
@@ -584,13 +586,14 @@ function adminPanel(){
 }
 $('adminBtn').onclick=adminPanel;$('couponBtn').onclick=couponPanel;
 const COUPON_LOCAL_KEY='rok-guide-coupon-used-v1';
-let couponSort='newest';
+let couponSort='newest'; let couponUsedExpanded=false;
 function getLocalCouponUses(){try{return JSON.parse(localStorage.getItem(COUPON_LOCAL_KEY)||'[]')}catch{return []}}
 function saveLocalCouponUses(values){try{localStorage.setItem(COUPON_LOCAL_KEY,JSON.stringify(values))}catch(e){showNotice('이 브라우저에 사용완료 상태를 저장할 수 없습니다.')}}
 async function couponPanel(){
  if(!client){showNotice('쿠폰 서비스에 연결되지 않았습니다.');return}
- openModal('🎁 쿠폰코드',`<p class="small">누구나 쿠폰을 등록하고 복사할 수 있습니다. 사용완료 상태는 ${currentUser?'로그인 계정에 저장되어 다른 기기에서도 유지됩니다.':'현재 브라우저에 저장됩니다. 다른 기기와 동기화하려면 로그인해 주세요.'}</p><form id="couponForm"><div class="field"><label for="couponCode">쿠폰코드</label><input id="couponCode" maxlength="100" required autocomplete="off" placeholder="쿠폰코드 입력"></div><div class="field"><label for="couponDescription">설명 (선택)</label><input id="couponDescription" maxlength="300" placeholder="쿠폰 정보"></div><button class="btn" type="submit" id="couponSubmit">쿠폰 등록</button></form><hr style="border:0;border-top:1px solid #40536a;margin:20px 0"><div class="section" style="flex-wrap:wrap"><h3 style="margin:0">등록된 쿠폰</h3><div class="actions" style="align-items:center"><label for="couponSort" class="small">정렬</label><select id="couponSort" aria-label="쿠폰 정렬" style="padding:9px"><option value="newest">최신순</option><option value="oldest">오래된순</option><option value="unused">미사용 우선</option></select><button class="ghost" type="button" id="couponRefresh">새로고침</button></div></div><div id="couponList" aria-live="polite"><p class="small">쿠폰을 불러오는 중...</p></div>`);
+ openModal('🎁 쿠폰코드',`<p class="small">누구나 쿠폰을 등록하고 복사할 수 있습니다. 사용완료 상태는 ${currentUser?'로그인 계정에 저장되어 다른 기기에서도 유지됩니다.':'현재 브라우저에 저장됩니다. 다른 기기와 동기화하려면 로그인해 주세요.'}</p><form id="couponForm"><div class="field"><label for="couponCode">쿠폰코드</label><input id="couponCode" maxlength="100" required autocomplete="off" placeholder="쿠폰코드 입력"></div><div class="field"><label for="couponDescription">설명 (선택)</label><input id="couponDescription" maxlength="300" placeholder="쿠폰 정보"></div><button class="btn" type="submit" id="couponSubmit">쿠폰 등록</button></form><hr style="border:0;border-top:1px solid #40536a;margin:20px 0"><div class="section" style="flex-wrap:wrap"><h3 style="margin:0">등록된 쿠폰</h3><div class="actions" style="align-items:center"><label for="couponSort" class="small">정렬</label><select id="couponSort" aria-label="쿠폰 정렬" style="padding:9px"><option value="newest">최신순</option><option value="oldest">오래된순</option><option value="unused">미사용 우선</option></select><button class="ghost" type="button" id="couponRefresh">새로고침</button></div></div><div id="couponList" aria-live="polite"><p class="small">쿠폰을 불러오는 중...</p></div><div class="coupon-used-section"><button class="ghost coupon-used-toggle" id="couponUsedToggle" type="button" aria-expanded="false" aria-controls="couponUsedList">▶ ✅ 사용완료 (0)</button><div id="couponUsedList" class="hidden"></div></div>`);
  $('couponRefresh').onclick=refreshCoupons;
+ $('couponUsedToggle').onclick=()=>{couponUsedExpanded=!couponUsedExpanded;setCouponUsedExpanded()};
  $('couponSort').value=couponSort;
  $('couponSort').onchange=()=>{couponSort=$('couponSort').value;refreshCoupons()};
  $('couponForm').onsubmit=async e=>{
@@ -601,6 +604,11 @@ async function couponPanel(){
   catch(err){showNotice('쿠폰 등록 실패: '+err.message)}finally{if(btn.isConnected)btn.disabled=false}
  };
  await refreshCoupons();
+}
+function setCouponUsedExpanded(){
+ const panel=$('couponUsedList'),toggle=$('couponUsedToggle');
+ if(panel)panel.classList.toggle('hidden',!couponUsedExpanded);
+ if(toggle){toggle.setAttribute('aria-expanded',String(couponUsedExpanded));toggle.textContent=toggle.textContent.replace(/^[▶▼]/,couponUsedExpanded?'▼':'▶')}
 }
 async function refreshCoupons(){
  const target=$('couponList');if(!target)return;target.innerHTML='<p class="small">쿠폰을 불러오는 중...</p>';
@@ -615,15 +623,23 @@ async function refreshCoupons(){
   if(couponSort==='oldest')coupons.sort((a,b)=>-byNewest(a,b));
   else if(couponSort==='unused')coupons.sort((a,b)=>Number(used.has(a.id))-Number(used.has(b.id))||byNewest(a,b));
   else coupons.sort(byNewest);
-  target.innerHTML=coupons.length?coupons.map(c=>`<div class="panel" style="margin:10px 0;padding:15px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><strong style="color:var(--gold);overflow-wrap:anywhere">${esc(c.code)}</strong><span class="small">${used.has(c.id)?'✅ 사용완료':'🎟️ 사용 전'}</span></div>${c.description?`<p class="small" style="overflow-wrap:anywhere">${esc(c.description)}</p>`:''}<div class="actions" style="margin-top:10px"><button class="ghost" type="button" data-copy-coupon="${esc(c.id)}">📋 복사</button><button class="${used.has(c.id)?'ghost':'btn'}" type="button" data-use-coupon="${esc(c.id)}">${used.has(c.id)?'사용완료 취소':'사용완료'}</button><button class="ghost" type="button" data-request-delete="${esc(c.id)}">📝 삭제 요청</button>${admin?`<button class="ghost" type="button" data-admin-delete-coupon="${esc(c.id)}">🗑️ 관리자 삭제</button>`:''}</div></div>`).join(''):'<p class="notice">아직 등록된 쿠폰이 없습니다. 첫 쿠폰을 등록해 보세요!</p>';
-  target.querySelectorAll('[data-request-delete]').forEach(btn=>btn.onclick=()=>{
+  const unusedCount=coupons.filter(c=>!used.has(c.id)).length;
+  const usedCount=coupons.length-unusedCount;
+  const makeCards=items=>items.map(c=>`<div class="panel" style="margin:10px 0;padding:15px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><strong style="color:var(--gold);overflow-wrap:anywhere">${esc(c.code)}</strong><span class="small">${used.has(c.id)?'✅ 사용완료':'🎟️ 사용 전'}</span></div>${c.description?`<p class="small" style="overflow-wrap:anywhere">${esc(c.description)}</p>`:''}<div class="actions" style="margin-top:10px"><button class="ghost" type="button" data-copy-coupon="${esc(c.id)}">📋 복사</button><button class="${used.has(c.id)?'ghost':'btn'}" type="button" data-use-coupon="${esc(c.id)}">${used.has(c.id)?'사용완료 취소':'사용완료'}</button><button class="ghost" type="button" data-request-delete="${esc(c.id)}">📝 삭제 요청</button>${admin?`<button class="ghost" type="button" data-admin-delete-coupon="${esc(c.id)}">🗑️ 관리자 삭제</button>`:''}</div></div>`).join('');
+  target.innerHTML=unusedCount?makeCards(coupons.filter(c=>!used.has(c.id))):'<p class="notice">사용 전 쿠폰이 없습니다.</p>';
+  const usedList=$('couponUsedList');
+  if(usedList)usedList.innerHTML=usedCount?makeCards(coupons.filter(c=>used.has(c.id))):'<p class="notice">사용완료한 쿠폰이 없습니다.</p>';
+  const usedToggle=$('couponUsedToggle');if(usedToggle)usedToggle.textContent=`${couponUsedExpanded?'▼':'▶'} ✅ 사용완료 (${usedCount})`;
+  setCouponUsedExpanded();
+  const couponActionRoot=$('modalBody');
+  couponActionRoot.querySelectorAll('[data-request-delete]').forEach(btn=>btn.onclick=()=>{
     const c=coupons.find(x=>String(x.id)===btn.dataset.requestDelete);if(c)requestCouponDeletion(c);
   });
-  target.querySelectorAll('[data-admin-delete-coupon]').forEach(btn=>btn.onclick=async()=>{
+  couponActionRoot.querySelectorAll('[data-admin-delete-coupon]').forEach(btn=>btn.onclick=async()=>{
     if(!admin)return;const c=coupons.find(x=>String(x.id)===btn.dataset.adminDeleteCoupon);if(c)await adminDeleteCoupon(c);
   });
-  target.querySelectorAll('[data-copy-coupon]').forEach(btn=>btn.onclick=async()=>{const c=coupons.find(x=>String(x.id)===btn.dataset.copyCoupon);if(!c)return;try{await navigator.clipboard.writeText(c.code);showNotice('쿠폰코드를 복사했습니다.')}catch{prompt('쿠폰코드를 복사해 주세요.',c.code)}});
-  target.querySelectorAll('[data-use-coupon]').forEach(btn=>btn.onclick=async()=>{
+  couponActionRoot.querySelectorAll('[data-copy-coupon]').forEach(btn=>btn.onclick=async()=>{const c=coupons.find(x=>String(x.id)===btn.dataset.copyCoupon);if(!c)return;try{await navigator.clipboard.writeText(c.code);showNotice('쿠폰코드를 복사했습니다.')}catch{prompt('쿠폰코드를 복사해 주세요.',c.code)}});
+  couponActionRoot.querySelectorAll('[data-use-coupon]').forEach(btn=>btn.onclick=async()=>{
    const id=btn.dataset.useCoupon,wasUsed=used.has(id);btn.disabled=true;
    try{
     if(userId){const q=client.from('coupon_usages');const result=wasUsed?await q.delete().eq('user_id',userId).eq('coupon_id',id):await q.insert({user_id:userId,coupon_id:id});if(result.error)throw result.error}
