@@ -928,7 +928,27 @@ function search(){query=$('search').value.trim().toLowerCase();if(isCalcCat(cate
  const permission=await Notification.requestPermission();if(permission!=='granted')throw Error('휴대폰 알림 권한을 허용해 주세요.');
  say('알림 구독을 등록하고 있습니다...');const reg=await navigator.serviceWorker.register('./shield-sw.js',{scope:'./'});await navigator.serviceWorker.ready;
  subscription=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64bytes(vapidPublicKey)});
- const payload=subscription.toJSON();const {error:subErr}=await db.from('shield_push_subscriptions').upsert({user_id:viewer.id,endpoint:payload.endpoint,p256dh:payload.keys.p256dh,auth:payload.keys.auth},{onConflict:'endpoint'});if(subErr)throw subErr;
+ // First attempt: save this browser's current subscription for the signed-in user.
+ // If the endpoint belongs to a previous login, RLS correctly blocks taking over that row.
+ // In that case, rotate the browser subscription and retry with a fresh endpoint once.
+ async function savePushSubscription(sub){
+  const payload=sub.toJSON();
+  if(!payload.endpoint||!payload.keys?.p256dh||!payload.keys?.auth)throw Error('브라우저 구독 정보가 완전하지 않습니다.');
+  return db.from('shield_push_subscriptions').upsert({user_id:viewer.id,endpoint:payload.endpoint,p256dh:payload.keys.p256dh,auth:payload.keys.auth},{onConflict:'endpoint'});
+ }
+ let {error:subErr}=await savePushSubscription(subscription);
+ if(subErr && (subErr.code==='42501'||/row.level.security|permission denied/i.test(subErr.message||''))){
+  say('이전 계정의 구독 정보와 충돌하여 브라우저 구독을 새로 발급하고 있습니다...');
+  const oldEndpoint=subscription.endpoint;
+  const unsubscribed=await subscription.unsubscribe();
+  if(!unsubscribed)throw Error('기존 브라우저 구독을 해제하지 못했습니다. Chrome 알림 설정을 확인해 주세요.');
+  subscription=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64bytes(vapidPublicKey)});
+  if(subscription.endpoint===oldEndpoint){
+   throw Error('브라우저가 이전 구독 주소를 다시 사용했습니다. Supabase에서 기존 주소의 소유 계정을 확인해야 합니다.');
+  }
+  ({error:subErr}=await savePushSubscription(subscription));
+ }
+ if(subErr)throw subErr;
  const prefs={user_id:viewer.id};for(const [id,col] of slots)prefs[col]=$(id).checked;
  const {error}=await db.from('shield_notification_preferences').upsert(prefs,{onConflict:'user_id'});if(error)throw error;
  say('저장 완료! 선택한 시간에 보호막 알림을 신청했습니다.');
