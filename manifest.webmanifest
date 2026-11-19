@@ -1,0 +1,17 @@
+{
+  "id": "/ROK-Guide/",
+  "name": "ROK-Guide",
+  "short_name": "ROK-Guide",
+  "description": "ROK-Guide 게임 공략 및 알림",
+  "lang": "ko",
+  "start_url": "/ROK-Guide/",
+  "scope": "/ROK-Guide/",
+  "display": "standalone",
+  "background_color": "#E9D5A4",
+  "theme_color": "#E9D5A4",
+  "icons": [
+    {"src": "./rok-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "./rok-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "./rok-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
