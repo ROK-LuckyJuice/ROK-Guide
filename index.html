@@ -995,25 +995,56 @@ function search(){query=$('search').value.trim().toLowerCase();if(isCalcCat(cate
 #shieldTutorial .st-actions{display:flex;gap:8px;flex-wrap:wrap}#shieldTutorial button,.shield-help-btn{border:1px solid #c69a54;background:#5a3620;color:#ffe6ad;border-radius:9px;padding:10px 14px;cursor:pointer;font-weight:bold}#shieldTutorial button.primary{background:#e4b96e;color:#27180e}#shieldTutorial .st-note{font-size:12px;color:#e3c99e}
 </style>
 <div id="shieldTutorial" role="dialog" aria-modal="true" aria-labelledby="shieldTutorialTitle"><div class="st-card"><div class="st-head"><h2 id="shieldTutorialTitle">📖 가이드 매뉴얼</h2><button type="button" id="shieldTutorialX">닫기 ✕</button></div><div id="shieldTutorialStep"></div><div class="st-actions"><button type="button" id="shieldTutorialPrev">이전</button><button type="button" id="shieldTutorialNext" class="primary">다음</button></div><p class="st-note">※ 실제 알림 수신에는 로그인과 기기 알림 권한이 필요하며, 브라우저 설정에 따라 제한될 수 있습니다.</p></div></div>
+<style id="rok-manual-categories-css">
+#shieldTutorial .st-card{max-height:90dvh;overflow-y:auto}
+#shieldTutorial .st-menu{display:grid;gap:12px;margin:20px 0}
+#shieldTutorial .st-menu button{width:100%;text-align:left;min-height:62px;font-size:17px;background:linear-gradient(135deg,#e9d3a2,#cba568);color:#342013;border:2px solid #a77b40}
+#shieldTutorial .st-menu button:focus-visible{outline:3px solid #ffe4a2;outline-offset:2px}
+#shieldTutorial .st-subtitle{font-size:13px;color:#e4c996;margin:6px 0}
+#shieldTutorial #shieldTutorialHome{background:#3c291e;color:#f5d89c}
+</style>
 <script id="shield-tutorial-script">(()=>{
-const modal=document.getElementById('shieldTutorial'),stepEl=document.getElementById('shieldTutorialStep');
-const steps=[
- ["🛡️ 보호막 알림 시작", "사이트 상단의 🛡️ 보호막 알림 버튼을 눌러 설정 화면을 여세요.", "🛡️ 보호막 알림"],
- ["회원 로그인 및 알림 권한", "ROK-Guide 닉네임 회원으로 로그인한 후 휴대폰 알림 권한을 허용해 주세요.", "🔐 회원 로그인  →  🔔 알림 허용"],
- ["보호막 알림 시간 선택", "한국 시간(KST) 기준 토요일 오전 11시, 토요일 오후 7시, 일요일 오전 8시 중 필요한 시간을 선택하세요.", "☑ 토요일 오전 11:00\n☑ 토요일 오후 7:00\n☑ 일요일 오전 8:00"],
- ["보호막 알림 저장", "보호막 알림 화면에서 ‘알림 신청·설정 저장’을 누르세요. 저장 후 선택한 시간에 알림이 발송됩니다.", "🔔 알림 신청·설정 저장"],
- ["보호막 알림 변경 및 해제", "선택 시간을 변경하면 다시 저장하세요. 더 이상 필요하지 않으면 ‘모든 알림 끄기’를 이용할 수 있습니다.", "⚙️ 설정 변경  ·  🔕 모든 알림 끄기"],
- ["🏴‍☠️ 유산 알람 시작", "이제 상단의 🏴‍☠️ 유산 알람 버튼을 누르세요. 유산 알림 수신과 유산 출현 알리기 기능을 이용할 수 있습니다.", "🏴‍☠️ 유산 알람"],
- ["유산 알림 수신 설정", "닉네임 회원으로 로그인하고 유산 알림 수신 상태를 확인하세요. 수신을 원하지 않으면 수신 OFF로 변경할 수 있습니다.", "🔔 유산 알림 수신 ON / OFF"],
- ["유산 발견 시 알리기", "게임에서 유산을 발견했다면 유산 알람 화면의 ‘유산 출현 알리기’를 누르세요.", "🏴‍☠️ 유산 출현 알리기"],
- ["카카오톡 공유 완료", "카카오톡 공유 화면이 열리면 공유를 끝까지 완료해 주세요. 공유를 완료해야 다른 수신 회원들에게 유산 푸시 알림을 보내는 절차가 진행됩니다.", "💬 카카오톡 공유 → 완료 → 🔔 푸시 알림"],
- ["가이드 매뉴얼 완료", "보호막은 원하는 시간을 저장하고, 유산은 수신 설정을 확인하세요. 유산 발견 시에는 카카오톡 공유까지 완료하는 것을 잊지 마세요!", "🛡️ 보호막 알림  ·  🏴‍☠️ 유산 알람"]
-];let current=0;
-function render(){const [title,desc,example]=steps[current];stepEl.replaceChildren();const count=document.createElement('p');count.textContent=`${current+1} / ${steps.length} 단계`;stepEl.append(count);const h=document.createElement('h3');h.textContent=title;stepEl.append(h);const p=document.createElement('p');p.textContent=desc;stepEl.append(p);const visual=document.createElement('div');visual.className='st-screen';visual.textContent=example.replace(/\n/g,'\n');stepEl.append(visual);document.getElementById('shieldTutorialPrev').disabled=current===0;document.getElementById('shieldTutorialNext').textContent=current===steps.length-1?'완료':'다음'}
-function close(){modal.classList.remove('open')};function open(){current=0;render();modal.classList.add('open')}
-document.getElementById('shieldTutorialX').onclick=close;document.getElementById('shieldTutorialPrev').onclick=()=>{if(current>0){current--;render()}};document.getElementById('shieldTutorialNext').onclick=()=>{if(current===steps.length-1)close();else{current++;render()}};modal.onclick=e=>{if(e.target===modal)close()};document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
-const sheet=document.querySelector('#shieldPanel .shield-sheet');if(sheet){const b=document.createElement('button');b.type='button';b.className='shield-help-btn';b.textContent='📖 보호막 알림 사용법';b.onclick=open;sheet.insertBefore(b,sheet.children[1]);}
-const actions=document.querySelector('header.top .actions');if(actions){const b=document.createElement('button');b.type='button';b.className='ghost';b.textContent='📖 가이드 매뉴얼';b.onclick=open;actions.appendChild(b)}
+const modal=document.getElementById('shieldTutorial');
+const stepEl=document.getElementById('shieldTutorialStep');
+const prev=document.getElementById('shieldTutorialPrev');
+const next=document.getElementById('shieldTutorialNext');
+const titleEl=document.getElementById('shieldTutorialTitle');
+const actions=document.querySelector('#shieldTutorial .st-actions');
+const home=document.createElement('button');home.type='button';home.id='shieldTutorialHome';home.textContent='☰ 목차';actions.insertBefore(home,prev);
+const groups=[
+ {name:'1. 🛡️ 보호막 알림',steps:[
+ ['보호막 알림 화면 열기','상단의 🛡️ 보호막 알림 버튼을 누르면 보호막 알림 설정 화면이 열립니다.','🛡️ 보호막 알림'],
+ ['로그인과 알림 허용','닉네임 회원으로 로그인하고 휴대폰에서 알림 수신을 허용하세요. 알림 권한이 꺼져 있다면 알림을 받을 수 없습니다.','🔐 로그인 → 🔔 알림 허용'],
+ ['알림 시간 선택','한국 시간(KST) 기준 토요일 오전 11시, 토요일 오후 7시, 일요일 오전 8시 중 원하는 시간에 체크하세요.','☑ 토요일 오전 11:00\n☑ 토요일 오후 7:00\n☑ 일요일 오전 8:00'],
+ ['알림 설정 저장','시간을 선택한 후 ‘알림 신청·설정 저장’ 버튼을 눌러 설정을 저장하세요.','🔔 알림 신청·설정 저장'],
+ ['변경 또는 해제','시간을 바꾸면 다시 저장하세요. 알림을 모두 중단하려면 ‘모든 알림 끄기’를 사용하세요.','⚙️ 시간 변경 → 저장\n🔕 모든 알림 끄기']
+ ]},
+ {name:'2. 🏴‍☠️ 유산 알람',steps:[
+ ['유산 알람 화면 열기','상단의 🏴‍☠️ 유산 알람 버튼을 눌러 유산 알림 화면으로 이동하세요.','🏴‍☠️ 유산 알람'],
+ ['알림 수신 설정','닉네임 회원으로 로그인한 뒤 유산 알림 수신 상태를 확인하세요. 알림을 받고 싶지 않다면 수신 OFF로 변경할 수 있습니다.','🔔 유산 알림 수신 ON / OFF'],
+ ['유산 출현 알리기','게임에서 유산을 발견하면 ‘유산 출현 알리기’ 버튼을 누르세요.','🏴‍☠️ 유산 출현 알리기'],
+ ['카카오톡 공유 완료','카카오톡 공유 화면에서 실제 공유를 끝까지 완료해야 다른 수신 회원들에게 푸시 알림을 보내는 절차가 진행됩니다.','💬 카카오톡 공유 → 완료\n🔔 회원 푸시 알림'],
+ ['알림 확인','유산 알림 수신을 켠 회원은 기기 알림 권한과 푸시 구독 상태에 따라 유산 출현 알림을 받을 수 있습니다.','🏴‍☠️ 유산! 달리세요!']
+ ]},
+ {name:'3. 🎁 쿠폰코드',steps:[
+ ['쿠폰코드 화면 열기','상단의 🎁 쿠폰코드 버튼을 누르면 쿠폰 목록과 등록 화면이 열립니다.','🎁 쿠폰코드'],
+ ['등록된 쿠폰 확인','등록된 쿠폰 목록을 살펴보세요. 최신순·오래된순·미사용 우선으로 정렬할 수 있습니다.','📋 등록된 쿠폰\n↕ 최신순 / 오래된순 / 미사용 우선'],
+ ['쿠폰 복사와 사용완료','원하는 쿠폰을 복사해 게임에서 사용한 뒤, 사이트에서 사용완료 상태로 표시해 관리하세요.','📋 쿠폰 복사 → 🎮 게임에서 사용\n✅ 사용완료'],
+ ['새 쿠폰 등록','새 쿠폰을 알게 되면 쿠폰코드를 입력하고 필요하면 설명을 추가한 뒤 ‘쿠폰 등록’을 누르세요.','✍️ 쿠폰코드 + 설명(선택)\n🎁 쿠폰 등록'],
+ ['사용완료 목록 확인','사용완료 목록에서 이미 사용한 쿠폰을 확인할 수 있습니다. 로그인 회원은 사용완료 기록이 계정에 저장되고, 비로그인은 현재 브라우저에 저장됩니다.','✅ 사용완료 목록\n🔐 로그인 시 계정에 기록']
+ ]}
+];
+let group=-1,current=0;
+function close(){modal.classList.remove('open')}
+function menu(){group=-1;titleEl.textContent='📖 가이드 매뉴얼';stepEl.replaceChildren();const p=document.createElement('p');p.className='st-subtitle';p.textContent='알아보고 싶은 사용법을 선택하세요.';stepEl.append(p);const list=document.createElement('div');list.className='st-menu';groups.forEach((g,i)=>{const btn=document.createElement('button');btn.type='button';btn.textContent=g.name;btn.onclick=()=>{group=i;current=0;render()};list.append(btn)});stepEl.append(list);actions.style.display='none'}
+function render(){const g=groups[group];const [title,desc,example]=g.steps[current];titleEl.textContent=g.name;stepEl.replaceChildren();const count=document.createElement('p');count.className='st-subtitle';count.textContent=`${current+1} / ${g.steps.length} 단계`;stepEl.append(count);const h=document.createElement('h3');h.textContent=title;stepEl.append(h);const p=document.createElement('p');p.textContent=desc;stepEl.append(p);const visual=document.createElement('div');visual.className='st-screen';visual.textContent=example;stepEl.append(visual);actions.style.display='flex';prev.disabled=current===0;next.textContent=current===g.steps.length-1?'목차로':'다음'}
+function open(selected=-1){modal.classList.add('open');if(selected>=0){group=selected;current=0;render()}else menu()}
+home.onclick=menu;document.getElementById('shieldTutorialX').onclick=close;
+prev.onclick=()=>{if(current>0){current--;render()}};
+next.onclick=()=>{if(group<0)return;if(current===groups[group].steps.length-1)menu();else{current++;render()}};
+modal.onclick=e=>{if(e.target===modal)close()};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))close()});
+const sheet=document.querySelector('#shieldPanel .shield-sheet');if(sheet){const b=document.createElement('button');b.type='button';b.className='shield-help-btn';b.textContent='📖 보호막 알림 사용법';b.onclick=()=>open(0);sheet.insertBefore(b,sheet.children[1])}
+const headerActions=document.querySelector('header.top .actions');if(headerActions){const b=document.createElement('button');b.type='button';b.className='ghost';b.textContent='📖 가이드 매뉴얼';b.onclick=()=>open();headerActions.appendChild(b)}
 })();</script>
 <div id="shieldPanel" class="shield-panel" role="dialog" aria-modal="true" aria-label="보호막 알림 설정"><div class="shield-sheet"><h2>🛡️ 보호막 사용 시간 알림</h2><p>한국 시간(KST) 기준으로 알림을 받을 시간을 선택하세요.</p><div class="shield-option"><label for="shieldSat11">토요일 오전 11:00</label><input type="checkbox" id="shieldSat11" checked></div><div class="shield-option"><label for="shieldSat19">토요일 오후 7:00</label><input type="checkbox" id="shieldSat19" checked></div><div class="shield-option"><label for="shieldSun08">일요일 오전 8:00</label><input type="checkbox" id="shieldSun08" checked></div><section id="shieldAdminTest" style="display:none;margin-top:20px;padding:14px;border:2px solid #a47b48;border-radius:9px"><h3>🧪 관리자 푸시 알림 테스트</h3><p class="shield-note">테스트 알림은 관리자 본인의 구독 기기에만 발송됩니다. 한국 시간 기준으로 예약하세요.</p><label for="shieldTestTime">테스트 발송 일시 (한국 시간)</label><input type="datetime-local" id="shieldTestTime" style="width:100%;padding:9px;box-sizing:border-box;margin:9px 0;font-size:16px"><button type="button" id="shieldTestSchedule" style="padding:10px;background:#3b2419;color:#ffe2aa;border-radius:7px">테스트 알림 예약</button><p id="shieldTestStatus" class="shield-note" aria-live="polite"></p></section><p id="shieldStatus" class="shield-note" aria-live="polite">회원 로그인 후 이용할 수 있습니다.</p><div class="shield-actions"><button type="button" id="shieldSave">알림 신청·설정 저장</button><button type="button" id="shieldDisable">모든 알림 끄기</button><button type="button" id="shieldClose">닫기</button></div><p class="shield-note">알림 권한을 허용해야 하며, 브라우저와 기기 설정에 따라 수신이 제한될 수 있습니다. iPhone은 홈 화면에 추가한 웹앱에서 신청하세요.</p></div></div><script>
 /* Separate module: does not alter existing guide/editor/account handlers. */
