@@ -804,9 +804,11 @@ function closeSiteNoticePopup(){
  const overlay=$('siteNoticeOverlay');if(!overlay)return;
  if($('siteNoticeSkipDay')?.checked){try{localStorage.setItem(NOTICE_SKIP_KEY,String(Date.now()+24*60*60*1000))}catch(e){console.warn('공지 숨김 저장 불가',e)}}
  overlay.hidden=true;overlay.style.display='none';document.body.style.overflow='';
+ if(typeof window.rokGuideMaybeShowManual==='function')window.rokGuideMaybeShowManual();
 }
 function maybeShowSiteNoticePopup(){
  if(siteNoticePopupShown||!siteNotices.length)return;
+ if(document.getElementById('shieldTutorial')?.classList.contains('open'))return;
  let hiddenUntil=0;try{hiddenUntil=Number(localStorage.getItem(NOTICE_SKIP_KEY)||0)}catch(e){}
  if(Date.now()<hiddenUntil)return;
  const overlay=$('siteNoticeOverlay'),body=$('siteNoticePopupBody');if(!overlay||!body)return;
@@ -826,6 +828,7 @@ async function loadNotices(){
  if(count)count.textContent=siteNotices.length+'건';
  if(list)list.innerHTML=siteNotices.length?siteNotices.map(n=>`<article class="notice-entry"><strong>${esc(n.title)}</strong><time>${esc((n.created_at||'').slice(0,10))}</time><div>${esc(n.content)}</div>${n.image_url?`<img src="${esc(n.image_url)}" alt="공지 첨부 이미지" loading="lazy">`:''}</article>`).join(''):'<div class="notice-empty">등록된 공지사항이 없습니다.</div>';
  maybeShowSiteNoticePopup();
+ if(typeof window.rokGuideMaybeShowManual==='function')window.rokGuideMaybeShowManual();
 }
 async function manageNotices(){
  if(!admin||!currentUser)return showNotice('관리자 권한이 필요합니다.');
@@ -994,7 +997,7 @@ function search(){query=$('search').value.trim().toLowerCase();if(isCalcCat(cate
 #shieldTutorial .st-head{display:flex;justify-content:space-between;align-items:center;gap:10px}#shieldTutorial h2{font-size:21px;margin:0;color:#ffe3a1}#shieldTutorial h3{font-size:20px;color:#ffe3a1}#shieldTutorial p{line-height:1.65}#shieldTutorial .st-screen{background:#ead2a4;color:#3b281c;border-radius:12px;padding:20px 12px;margin:14px 0;text-align:center;font-size:18px;min-height:95px;display:flex;align-items:center;justify-content:center;white-space:pre-line}
 #shieldTutorial .st-actions{display:flex;gap:8px;flex-wrap:wrap}#shieldTutorial button,.shield-help-btn{border:1px solid #c69a54;background:#5a3620;color:#ffe6ad;border-radius:9px;padding:10px 14px;cursor:pointer;font-weight:bold}#shieldTutorial button.primary{background:#e4b96e;color:#27180e}#shieldTutorial .st-note{font-size:12px;color:#e3c99e}
 </style>
-<div id="shieldTutorial" role="dialog" aria-modal="true" aria-labelledby="shieldTutorialTitle"><div class="st-card"><div class="st-head"><h2 id="shieldTutorialTitle">📖 가이드 매뉴얼</h2><button type="button" id="shieldTutorialX">닫기 ✕</button></div><div id="shieldTutorialStep"></div><div class="st-actions"><button type="button" id="shieldTutorialPrev">이전</button><button type="button" id="shieldTutorialNext" class="primary">다음</button></div><p class="st-note">※ 실제 알림 수신에는 로그인과 기기 알림 권한이 필요하며, 브라우저 설정에 따라 제한될 수 있습니다.</p></div></div>
+<div id="shieldTutorial" role="dialog" aria-modal="true" aria-labelledby="shieldTutorialTitle"><div class="st-card"><div class="st-head"><h2 id="shieldTutorialTitle">📖 가이드 매뉴얼</h2><button type="button" id="shieldTutorialX">닫기 ✕</button></div><div id="shieldTutorialStep"></div><div class="st-actions"><button type="button" id="shieldTutorialPrev">이전</button><button type="button" id="shieldTutorialNext" class="primary">다음</button></div><div class="st-skip"><label><input type="checkbox" id="shieldTutorialSkipDay"> 하루 동안 보지 않기</label></div><p class="st-note">※ 실제 알림 수신에는 로그인과 기기 알림 권한이 필요하며, 브라우저 설정에 따라 제한될 수 있습니다.</p></div></div>
 <style id="rok-manual-categories-css">
 #shieldTutorial .st-card{max-height:90dvh;overflow-y:auto}
 #shieldTutorial .st-menu{display:grid;gap:12px;margin:20px 0}
@@ -1002,6 +1005,11 @@ function search(){query=$('search').value.trim().toLowerCase();if(isCalcCat(cate
 #shieldTutorial .st-menu button:focus-visible{outline:3px solid #ffe4a2;outline-offset:2px}
 #shieldTutorial .st-subtitle{font-size:13px;color:#e4c996;margin:6px 0}
 #shieldTutorial #shieldTutorialHome{background:#3c291e;color:#f5d89c}
+</style>
+<style id="rok-manual-autopopup-css">
+#shieldTutorial .st-skip{margin-top:15px;padding-top:12px;border-top:1px solid #8a643c;font-size:14px;color:#f0d5a2}
+#shieldTutorial .st-skip label{display:inline-flex;align-items:center;gap:7px;cursor:pointer}
+#shieldTutorial .st-skip input{accent-color:#d8ab61;width:17px;height:17px}
 </style>
 <script id="shield-tutorial-script">(()=>{
 const modal=document.getElementById('shieldTutorial');
@@ -1035,16 +1043,34 @@ const groups=[
  ]}
 ];
 let group=-1,current=0;
-function close(){modal.classList.remove('open')}
+const MANUAL_SKIP_KEY='rok-guide-manual-hidden-until';
+let manualAutoShown=false;
+const skipDay=document.getElementById('shieldTutorialSkipDay');
+function close(){
+ if(skipDay?.checked){try{localStorage.setItem(MANUAL_SKIP_KEY,String(Date.now()+24*60*60*1000))}catch(e){console.warn('매뉴얼 숨김 저장 불가',e)}}
+ modal.classList.remove('open');
+ if(typeof maybeShowSiteNoticePopup==='function')maybeShowSiteNoticePopup();
+}
+function maybeAutoOpenManual(){
+ if(manualAutoShown||modal.classList.contains('open'))return;
+ let hiddenUntil=0;try{hiddenUntil=Number(localStorage.getItem(MANUAL_SKIP_KEY)||0)}catch(e){}
+ if(Date.now()<hiddenUntil)return;
+ const notice=document.getElementById('siteNoticeOverlay');
+ if(notice&&!notice.hidden&&notice.style.display!=='none')return;
+ manualAutoShown=true;open();
+}
+window.rokGuideMaybeShowManual=maybeAutoOpenManual;
+
 function menu(){group=-1;titleEl.textContent='📖 가이드 매뉴얼';stepEl.replaceChildren();const p=document.createElement('p');p.className='st-subtitle';p.textContent='알아보고 싶은 사용법을 선택하세요.';stepEl.append(p);const list=document.createElement('div');list.className='st-menu';groups.forEach((g,i)=>{const btn=document.createElement('button');btn.type='button';btn.textContent=g.name;btn.onclick=()=>{group=i;current=0;render()};list.append(btn)});stepEl.append(list);actions.style.display='none'}
 function render(){const g=groups[group];const [title,desc,example]=g.steps[current];titleEl.textContent=g.name;stepEl.replaceChildren();const count=document.createElement('p');count.className='st-subtitle';count.textContent=`${current+1} / ${g.steps.length} 단계`;stepEl.append(count);const h=document.createElement('h3');h.textContent=title;stepEl.append(h);const p=document.createElement('p');p.textContent=desc;stepEl.append(p);const visual=document.createElement('div');visual.className='st-screen';visual.textContent=example;stepEl.append(visual);actions.style.display='flex';prev.disabled=current===0;next.textContent=current===g.steps.length-1?'목차로':'다음'}
-function open(selected=-1){modal.classList.add('open');if(selected>=0){group=selected;current=0;render()}else menu()}
+function open(selected=-1){if(skipDay)skipDay.checked=false;modal.classList.add('open');if(selected>=0){group=selected;current=0;render()}else menu()}
 home.onclick=menu;document.getElementById('shieldTutorialX').onclick=close;
 prev.onclick=()=>{if(current>0){current--;render()}};
 next.onclick=()=>{if(group<0)return;if(current===groups[group].steps.length-1)menu();else{current++;render()}};
 modal.onclick=e=>{if(e.target===modal)close()};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))close()});
 const sheet=document.querySelector('#shieldPanel .shield-sheet');if(sheet){const b=document.createElement('button');b.type='button';b.className='shield-help-btn';b.textContent='📖 보호막 알림 사용법';b.onclick=()=>open(0);sheet.insertBefore(b,sheet.children[1])}
 const headerActions=document.querySelector('header.top .actions');if(headerActions){const b=document.createElement('button');b.type='button';b.className='ghost';b.textContent='📖 가이드 매뉴얼';b.onclick=()=>open();headerActions.appendChild(b)}
+window.addEventListener('load',()=>setTimeout(maybeAutoOpenManual,3000),{once:true});
 })();</script>
 <div id="shieldPanel" class="shield-panel" role="dialog" aria-modal="true" aria-label="보호막 알림 설정"><div class="shield-sheet"><h2>🛡️ 보호막 사용 시간 알림</h2><p>한국 시간(KST) 기준으로 알림을 받을 시간을 선택하세요.</p><div class="shield-option"><label for="shieldSat11">토요일 오전 11:00</label><input type="checkbox" id="shieldSat11" checked></div><div class="shield-option"><label for="shieldSat19">토요일 오후 7:00</label><input type="checkbox" id="shieldSat19" checked></div><div class="shield-option"><label for="shieldSun08">일요일 오전 8:00</label><input type="checkbox" id="shieldSun08" checked></div><section id="shieldAdminTest" style="display:none;margin-top:20px;padding:14px;border:2px solid #a47b48;border-radius:9px"><h3>🧪 관리자 푸시 알림 테스트</h3><p class="shield-note">테스트 알림은 관리자 본인의 구독 기기에만 발송됩니다. 한국 시간 기준으로 예약하세요.</p><label for="shieldTestTime">테스트 발송 일시 (한국 시간)</label><input type="datetime-local" id="shieldTestTime" style="width:100%;padding:9px;box-sizing:border-box;margin:9px 0;font-size:16px"><button type="button" id="shieldTestSchedule" style="padding:10px;background:#3b2419;color:#ffe2aa;border-radius:7px">테스트 알림 예약</button><p id="shieldTestStatus" class="shield-note" aria-live="polite"></p></section><p id="shieldStatus" class="shield-note" aria-live="polite">회원 로그인 후 이용할 수 있습니다.</p><div class="shield-actions"><button type="button" id="shieldSave">알림 신청·설정 저장</button><button type="button" id="shieldDisable">모든 알림 끄기</button><button type="button" id="shieldClose">닫기</button></div><p class="shield-note">알림 권한을 허용해야 하며, 브라우저와 기기 설정에 따라 수신이 제한될 수 있습니다. iPhone은 홈 화면에 추가한 웹앱에서 신청하세요.</p></div></div><script>
 /* Separate module: does not alter existing guide/editor/account handlers. */
