@@ -1146,7 +1146,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.c
 </style>
 <div id="legacyAlertPanel" role="dialog" aria-modal="true" aria-labelledby="legacyAlertTitle"><div class="legacy-card">
 <h2 id="legacyAlertTitle">🏴‍☠️ 유산 알람</h2>
-<div id="legacyIntro"><p>게임에서 유산을 발견하셨나요? 모두에게 알려주세요!</p><p class="legacy-note">로그인한 ROK-Guide 회원만 발송할 수 있습니다. 유산 알림 수신 동의 회원의 등록된 기기에만 알림이 전송됩니다.</p><button type="button" class="legacy-primary" id="legacyBegin" style="width:100%">📢 유산 출현 알리기</button></div>
+<div id="legacyIntro"><p>게임에서 유산을 발견하셨나요? 모두에게 알려주세요!</p><p class="legacy-note">📢 <strong>전체 알림 발송 방법</strong>: 아래 [유산 출현 알리기]를 누른 뒤 카카오톡 공유 창에서 대상을 선택하고 <strong>공유하기까지 완료해야</strong> 수신 ON 회원의 등록된 기기로 유산 알림이 발송됩니다. 공유를 취소하면 발송되지 않습니다.</p><button type="button" class="legacy-primary" id="legacyBegin" style="width:100%">📢 유산 출현 알리기</button></div>
 <section id="relicPrefs" class="legacy-note" style="padding:12px;margin:12px 0;border:1px solid #b88b50;border-radius:9px;background:#f8e8c7">
 <strong>🔔 유산 알림 수신 설정</strong><p id="relicPrefState" role="status" aria-live="polite">설정 확인 중...</p>
 <div class="legacy-actions"><button type="button" class="legacy-primary" id="relicPrefOn">수신 ON</button><button type="button" class="legacy-secondary" id="relicPrefOff">수신 OFF</button></div>
@@ -1168,7 +1168,13 @@ function showError(err){return err instanceof Error?err.message:String(err)}
 function close(){panel.classList.remove('open');confirm.hidden=true;intro.hidden=false}
 const button=document.createElement('button');button.type='button';button.className='legacy-launch';button.textContent='🏴‍☠️ 유산 알람';
 (document.querySelector('header.top .actions')||document.body).appendChild(button);
-async function refreshPref(){prefState.textContent='수신 동의 확인 중...';try{const {c,session}=await getSession();const {data,error}=await c.from('rok_relic_push_preferences').select('enabled').eq('user_id',session.user.id).maybeSingle();if(error)throw error;prefState.textContent=data?.enabled?'현재 상태: 수신 ON':'현재 상태: 수신 OFF';}catch(err){prefState.textContent=showError(err)}}
+async function refreshPref(){prefState.textContent='수신 동의 확인 중...';try{const {c,session}=await getSession();const {data,error}=await c.from('rok_relic_push_preferences').select('enabled').eq('user_id',session.user.id).maybeSingle();if(error)throw error;if(!data){
+  const {error:saveError}=await c.rpc('rok_relic_set_preference',{p_enabled:true});
+  if(saveError)throw saveError;
+  prefState.textContent='현재 상태: 수신 ON (기본 설정)';
+ }else{
+  prefState.textContent=data.enabled?'현재 상태: 수신 ON':'현재 상태: 수신 OFF';
+ }}catch(err){prefState.textContent=showError(err)}}
 button.onclick=()=>{status.textContent='';panel.classList.add('open');refreshPref()};
 $('legacyClose').onclick=close;
 $('legacyBegin').onclick=()=>{intro.hidden=true;confirm.hidden=true;$('legacySend').click();};
@@ -1207,7 +1213,7 @@ $('legacySend').onclick=async()=>{
    content:{
     title:'🏴‍☠️ 유산 출현!',
     description:'유산! 달리세요!',
-    imageUrl:'https://rok-luckyjuice.github.io/ROK-Guide/rok-icon-192.png',
+    imageUrl:'https://rok-luckyjuice.github.io/ROK-Guide/rok-relic-alert.png?v=20261121',
     link:{mobileWebUrl:'https://rok-luckyjuice.github.io/ROK-Guide/',webUrl:'https://rok-luckyjuice.github.io/ROK-Guide/'}
    },
    buttons:[{title:'ROK-Guide 열기',link:{mobileWebUrl:'https://rok-luckyjuice.github.io/ROK-Guide/',webUrl:'https://rok-luckyjuice.github.io/ROK-Guide/'}}],
