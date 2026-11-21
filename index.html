@@ -1146,30 +1146,46 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.c
 </style>
 <div id="legacyAlertPanel" role="dialog" aria-modal="true" aria-labelledby="legacyAlertTitle"><div class="legacy-card">
 <h2 id="legacyAlertTitle">🏴‍☠️ 유산 알람</h2>
-<div id="legacyIntro"><p>게임에서 유산을 발견하셨나요? 모두에게 알려주세요!</p><p class="legacy-note">회원·비회원 모두 사용할 수 있습니다. 알림을 허용한 기기만 푸시를 받을 수 있습니다.</p><button type="button" class="legacy-primary" id="legacyBegin" style="width:100%">📢 유산 출현 알리기</button></div>
-<div id="legacyConfirm" hidden><h3>📢 발송 전 확인</h3><p><strong>유산 출현!</strong></p><p>유산! 달리세요!</p><p class="legacy-note">잘못된 알림은 다른 이용자에게 피해를 줄 수 있습니다. 실제로 유산을 발견했을 때만 눌러주세요.</p><div class="legacy-actions"><button type="button" class="legacy-secondary" id="legacyCancel">취소</button><button type="button" class="legacy-primary" id="legacySend">발송 확인</button></div></div>
+<div id="legacyIntro"><p>게임에서 유산을 발견하셨나요? 모두에게 알려주세요!</p><p class="legacy-note">로그인한 ROK-Guide 회원만 발송할 수 있습니다. 유산 알림 수신 동의 회원의 등록된 기기에만 알림이 전송됩니다.</p><button type="button" class="legacy-primary" id="legacyBegin" style="width:100%">📢 유산 출현 알리기</button></div>
+<section id="relicPrefs" class="legacy-note" style="padding:12px;margin:12px 0;border:1px solid #b88b50;border-radius:9px;background:#f8e8c7">
+<strong>🔔 유산 알림 수신 설정</strong><p id="relicPrefState" role="status" aria-live="polite">설정 확인 중...</p>
+<div class="legacy-actions"><button type="button" class="legacy-primary" id="relicPrefOn">수신 ON</button><button type="button" class="legacy-secondary" id="relicPrefOff">수신 OFF</button></div>
+<p class="legacy-note">기기 푸시 구독이 별도로 필요합니다. 보호막 알림에서 기기 알림 신청을 먼저 완료해 주세요. 보호막 수신 시간 설정과 유산 수신 동의는 별개입니다.</p>
+</section><div id="legacyConfirm" hidden><h3>📢 발송 전 확인</h3><p><strong>유산 출현!</strong></p><p>유산! 달리세요!</p><p class="legacy-note">잘못된 알림은 다른 이용자에게 피해를 줄 수 있습니다. 실제로 유산을 발견했을 때만 눌러주세요.</p><div class="legacy-actions"><button type="button" class="legacy-secondary" id="legacyCancel">취소</button><button type="button" class="legacy-primary" id="legacySend">발송 확인</button></div></div>
 <p id="legacyStatus" class="legacy-note" role="status" aria-live="polite"></p>
 <button type="button" class="legacy-secondary" id="legacyClose" style="width:100%;margin-top:8px">닫기</button>
 </div></div>
 <script id="legacy-alert-script">(()=>{
-const panel=document.getElementById('legacyAlertPanel'),intro=document.getElementById('legacyIntro'),confirm=document.getElementById('legacyConfirm'),status=document.getElementById('legacyStatus');
+const projectUrl='https://ncfgwsgwohligwwlemcw.supabase.co';
+const anonKey='sb_publishable_65uGXHJw36zlPK0ovhPUOA_trFLWh3j';
+const $=id=>document.getElementById(id);
+const panel=$('legacyAlertPanel'),intro=$('legacyIntro'),confirm=$('legacyConfirm'),status=$('legacyStatus');
+const prefState=$('relicPrefState');
+let db=null,loading=false;
+async function getDb(){if(!db){const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2');db=createClient(projectUrl,anonKey,{auth:{persistSession:true,storageKey:'sb-'+new URL(projectUrl).hostname.split('.')[0]+'-auth-token'}})}return db}
+async function getSession(){const c=await getDb();const {data,error}=await c.auth.getSession();if(error||!data?.session?.access_token)throw Error('회원 로그인 후 이용해 주세요.');return {c,session:data.session}}
+function showError(err){return err instanceof Error?err.message:String(err)}
+function close(){panel.classList.remove('open');confirm.hidden=true;intro.hidden=false}
 const button=document.createElement('button');button.type='button';button.className='legacy-launch';button.textContent='🏴‍☠️ 유산 알람';
 (document.querySelector('header.top .actions')||document.body).appendChild(button);
-function close(){panel.classList.remove('open');confirm.hidden=true;intro.hidden=false}
-button.onclick=()=>{status.textContent='';panel.classList.add('open')};
-document.getElementById('legacyClose').onclick=close;
-document.getElementById('legacyBegin').onclick=()=>{intro.hidden=true;confirm.hidden=false;status.textContent=''};
-document.getElementById('legacyCancel').onclick=()=>{intro.hidden=false;confirm.hidden=true};
+async function refreshPref(){prefState.textContent='수신 동의 확인 중...';try{const {c,session}=await getSession();const {data,error}=await c.from('rok_relic_push_preferences').select('enabled').eq('user_id',session.user.id).maybeSingle();if(error)throw error;prefState.textContent=data?.enabled?'현재 상태: 수신 ON':'현재 상태: 수신 OFF';}catch(err){prefState.textContent=showError(err)}}
+button.onclick=()=>{status.textContent='';panel.classList.add('open');refreshPref()};
+$('legacyClose').onclick=close;
+$('legacyBegin').onclick=async()=>{try{await getSession();intro.hidden=true;confirm.hidden=false;status.textContent=''}catch(err){status.textContent=showError(err)}};
+$('legacyCancel').onclick=()=>{intro.hidden=false;confirm.hidden=true};
 panel.addEventListener('click',e=>{if(e.target===panel)close()});
-document.getElementById('legacySend').onclick=async()=>{
- const send=document.getElementById('legacySend');send.disabled=true;status.textContent='발송 요청 확인 중...';
+async function setPreference(enabled){if(loading)return;loading=true;$('relicPrefOn').disabled=$('relicPrefOff').disabled=true;prefState.textContent='설정 저장 중...';try{const {c}=await getSession();const {error}=await c.rpc('rok_relic_set_preference',{p_enabled:enabled});if(error)throw error;prefState.textContent=enabled?'수신 ON 저장 완료. 기기 푸시 구독이 있어야 실제 알림을 받습니다.':'수신 OFF 저장 완료.';}catch(err){prefState.textContent='저장 실패: '+showError(err)}finally{loading=false;$('relicPrefOn').disabled=$('relicPrefOff').disabled=false}}
+$('relicPrefOn').onclick=()=>setPreference(true);
+$('relicPrefOff').onclick=()=>setPreference(false);
+$('legacySend').onclick=async()=>{
+ const send=$('legacySend');if(send.disabled)return;send.disabled=true;status.textContent='발송 요청 확인 중...';
  try{
-  const endpoint='https://ncfgwsgwohligwwlemcw.supabase.co/functions/v1/legacy-alert-broadcast';
-  const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_65uGXHJw36zlPK0ovhPUOA_trFLWh3j'},body:JSON.stringify({event:'legacy_found'})});
+  const {session}=await getSession();
+  const res=await fetch(projectUrl+'/functions/v1/rok-relic-alert',{method:'POST',headers:{'Content-Type':'application/json','apikey':anonKey,'Authorization':'Bearer '+session.access_token},body:JSON.stringify({action:'send'})});
   const result=await res.json().catch(()=>({}));
-  if(!res.ok||!result.ok)throw Error(result.error||('서버 발송 기능 준비 중 ('+res.status+')'));
-  status.textContent='유산 알림 발송 요청이 접수되었습니다.';confirm.hidden=true;
- }catch(err){status.textContent='아직 발송 서버가 연결되지 않아 알림이 전송되지 않았습니다. ('+err.message+')'}finally{send.disabled=false}
+  if(!res.ok||result.success!==true)throw Error(result.error||result.message||('발송 실패 (HTTP '+res.status+')'));
+  status.textContent='유산 알림 발송 완료 · 성공 '+(result.sent??0)+'건 / 실패 '+(result.failed??0)+'건';confirm.hidden=true;
+ }catch(err){status.textContent='발송 실패: '+showError(err)}finally{send.disabled=false}
 };
 })();</script>
 
