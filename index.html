@@ -1171,7 +1171,7 @@ const button=document.createElement('button');button.type='button';button.classN
 async function refreshPref(){prefState.textContent='수신 동의 확인 중...';try{const {c,session}=await getSession();const {data,error}=await c.from('rok_relic_push_preferences').select('enabled').eq('user_id',session.user.id).maybeSingle();if(error)throw error;prefState.textContent=data?.enabled?'현재 상태: 수신 ON':'현재 상태: 수신 OFF';}catch(err){prefState.textContent=showError(err)}}
 button.onclick=()=>{status.textContent='';panel.classList.add('open');refreshPref()};
 $('legacyClose').onclick=close;
-$('legacyBegin').onclick=async()=>{try{await getSession();intro.hidden=true;confirm.hidden=false;status.textContent=''}catch(err){status.textContent=showError(err)}};
+$('legacyBegin').onclick=()=>{intro.hidden=true;confirm.hidden=true;$('legacySend').click();};
 $('legacyCancel').onclick=()=>{intro.hidden=false;confirm.hidden=true};
 panel.addEventListener('click',e=>{if(e.target===panel)close()});
 async function setPreference(enabled){if(loading)return;loading=true;$('relicPrefOn').disabled=$('relicPrefOff').disabled=true;prefState.textContent='설정 저장 중...';try{const {c}=await getSession();const {error}=await c.rpc('rok_relic_set_preference',{p_enabled:enabled});if(error)throw error;prefState.textContent=enabled?'수신 ON 저장 완료. 기기 푸시 구독이 있어야 실제 알림을 받습니다.':'수신 OFF 저장 완료.';}catch(err){prefState.textContent='저장 실패: '+showError(err)}finally{loading=false;$('relicPrefOn').disabled=$('relicPrefOff').disabled=false}}
