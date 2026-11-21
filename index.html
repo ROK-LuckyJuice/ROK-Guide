@@ -1134,4 +1134,43 @@ window.addEventListener('load',()=>{let disabled=false;try{disabled=localStorage
 overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('rok-show'))close()});
 })();
-</script></body></html>
+</script>
+<!-- ROK-Guide legacy alert: public request UI; backend delivery requires separate setup -->
+<style id="legacy-alert-css">
+#legacyAlertPanel{position:fixed;inset:0;background:#000b;z-index:2147483001;display:none;align-items:center;justify-content:center;padding:16px}#legacyAlertPanel.open{display:flex}
+#legacyAlertPanel .legacy-card{width:min(100%,440px);max-height:90vh;overflow:auto;background:#ead5aa;color:#352215;border:4px double #9b6b35;border-radius:15px;padding:22px;box-sizing:border-box;box-shadow:0 12px 50px #0009}
+#legacyAlertPanel button,.legacy-launch{border:1px solid #9e723b;border-radius:9px;padding:11px 14px;font:inherit;font-weight:bold;cursor:pointer}
+#legacyAlertPanel .legacy-primary,.legacy-launch{background:#5c321c;color:#ffe3a7}#legacyAlertPanel .legacy-secondary{background:#f3e5c8;color:#51391d}
+#legacyAlertPanel .legacy-actions{display:flex;gap:9px;margin-top:15px}#legacyAlertPanel .legacy-actions button{flex:1}
+#legacyAlertPanel .legacy-note{font-size:13px;line-height:1.6;color:#6d5032}
+</style>
+<div id="legacyAlertPanel" role="dialog" aria-modal="true" aria-labelledby="legacyAlertTitle"><div class="legacy-card">
+<h2 id="legacyAlertTitle">🏴‍☠️ 유산 알람</h2>
+<div id="legacyIntro"><p>게임에서 유산을 발견하셨나요? 모두에게 알려주세요!</p><p class="legacy-note">회원·비회원 모두 사용할 수 있습니다. 알림을 허용한 기기만 푸시를 받을 수 있습니다.</p><button type="button" class="legacy-primary" id="legacyBegin" style="width:100%">📢 유산 출현 알리기</button></div>
+<div id="legacyConfirm" hidden><h3>📢 발송 전 확인</h3><p><strong>유산 출현!</strong></p><p>유산! 달리세요!</p><p class="legacy-note">잘못된 알림은 다른 이용자에게 피해를 줄 수 있습니다. 실제로 유산을 발견했을 때만 눌러주세요.</p><div class="legacy-actions"><button type="button" class="legacy-secondary" id="legacyCancel">취소</button><button type="button" class="legacy-primary" id="legacySend">발송 확인</button></div></div>
+<p id="legacyStatus" class="legacy-note" role="status" aria-live="polite"></p>
+<button type="button" class="legacy-secondary" id="legacyClose" style="width:100%;margin-top:8px">닫기</button>
+</div></div>
+<script id="legacy-alert-script">(()=>{
+const panel=document.getElementById('legacyAlertPanel'),intro=document.getElementById('legacyIntro'),confirm=document.getElementById('legacyConfirm'),status=document.getElementById('legacyStatus');
+const button=document.createElement('button');button.type='button';button.className='legacy-launch';button.textContent='🏴‍☠️ 유산 알람';
+(document.querySelector('header.top .actions')||document.body).appendChild(button);
+function close(){panel.classList.remove('open');confirm.hidden=true;intro.hidden=false}
+button.onclick=()=>{status.textContent='';panel.classList.add('open')};
+document.getElementById('legacyClose').onclick=close;
+document.getElementById('legacyBegin').onclick=()=>{intro.hidden=true;confirm.hidden=false;status.textContent=''};
+document.getElementById('legacyCancel').onclick=()=>{intro.hidden=false;confirm.hidden=true};
+panel.addEventListener('click',e=>{if(e.target===panel)close()});
+document.getElementById('legacySend').onclick=async()=>{
+ const send=document.getElementById('legacySend');send.disabled=true;status.textContent='발송 요청 확인 중...';
+ try{
+  const endpoint='https://ncfgwsgwohligwwlemcw.supabase.co/functions/v1/legacy-alert-broadcast';
+  const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_65uGXHJw36zlPK0ovhPUOA_trFLWh3j'},body:JSON.stringify({event:'legacy_found'})});
+  const result=await res.json().catch(()=>({}));
+  if(!res.ok||!result.ok)throw Error(result.error||('서버 발송 기능 준비 중 ('+res.status+')'));
+  status.textContent='유산 알림 발송 요청이 접수되었습니다.';confirm.hidden=true;
+ }catch(err){status.textContent='아직 발송 서버가 연결되지 않아 알림이 전송되지 않았습니다. ('+err.message+')'}finally{send.disabled=false}
+};
+})();</script>
+
+</body></html>
